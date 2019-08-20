@@ -1,10 +1,13 @@
 from django.shortcuts import render
-from sklearn.linear_model import LinearRegression
 from sklearn.svm import SVR
-from django.http import JsonResponse
+from sample_dashboard.updateLogic import *
 
-from sample_dashboard.chartLogic import *
+########### GLOBAL VARS ###############################
+current_deg_values = [4, 5, 6, 7]
+mean_df_week = read_data('Week15minMeanNumericalLog')
+r = TestResults()
 
+#######################################################
 
 def dashboard(request):
     return render(request, 'dashboard/home.html', {'context': 'empty'})
@@ -12,10 +15,6 @@ def dashboard(request):
 
 def index(request):
     return render(request, 'dashboard/welcome.html')
-
-current_deg_values = [4, 5, 6, 7]
-mean_df_week = read_data('Week15minMeanNumericalLog')
-r = TestResults()
 
 
 def poly_reg(request):
@@ -32,19 +31,18 @@ def poly_reg(request):
         # apply the linear regression in the transformed featurespace.
         lm = LinearRegression()
         lm.fit(t.X_train, t.y_train)
-        predictions = predictLinearReg(r,t,lm)
+        predictions = predictLinearReg(r, t, lm)
         alg_name = 'Polynomial reg. deg=%s' % current_deg_values[count]
         processLinearReg(t, r, predictions, alg_name)
 
-    context = getLinRegReportDump(r,mean_df_week)
+    context = getLinRegReportDump(r, mean_df_week)
     return render(request, 'dashboard/poly_reg_report.html', {'context': context})
 
 
 def poly_svr_deg(request):
-
     r = TestResults()
     t = getSVMTestData(mean_df_week)
-    deg_values = [ 4, 5, 6, 7, 8]
+    deg_values = [4, 5, 6, 7, 8]
 
     for count in range(len(deg_values)):
         # Predictions are done with scaled values.
@@ -54,18 +52,17 @@ def poly_svr_deg(request):
         alg_name = 'svr poly deg=%s' % clf.degree
         processSVRReg(t, r, clf, predictions, alg_name)
 
-    context = getSVMReportDump(t,r)
+    context = getSVMReportDump(t, r)
 
     return render(request, 'dashboard/svr_report.html', {'context': context})
 
 
 def poly_svr_gamma(request):
-
     r = TestResults()
 
     t = getSVMTestData(mean_df_week)
 
-    gamma_values = [ 5.25, 5.2, 5.1, 5]
+    gamma_values = [5.25, 5.2, 5.1, 5]
 
     for count in range(len(gamma_values)):
         # Predictions are done with scaled values.
@@ -81,7 +78,6 @@ def poly_svr_gamma(request):
 
 
 def poly_svr_epsilon(request):
-
     r = TestResults()
     t = getSVMTestData(mean_df_week)
     epsilon_values = [0.1, 0.095, 0.09, 0.085]
@@ -100,10 +96,9 @@ def poly_svr_epsilon(request):
 
 
 def poly_svr_C(request):
-
     r = TestResults()
     t = getSVMTestData(mean_df_week)
-    C_values = [ 1, 5, 10, 15, 20]
+    C_values = [1, 5, 10, 15, 20]
 
     for count in range(len(C_values)):
         # Predictions are done with scaled values.
@@ -139,7 +134,7 @@ def rbf_svr_gamma(request):
 def rbf_svr_epsilon(request):
     r = TestResults()
     t = getSVMTestData(mean_df_week)
-    epsilon_values = [0.01,0.03,0.05,0.08,0.1]
+    epsilon_values = [0.01, 0.03, 0.05, 0.08, 0.1]
 
     for count in range(len(epsilon_values)):
         # Predictions are done with scaled values.
@@ -157,7 +152,7 @@ def rbf_svr_epsilon(request):
 def rbf_svr_C(request):
     r = TestResults()
     t = getSVMTestData(mean_df_week)
-    C_values = [0.1,0.6,1,1.5]
+    C_values = [0.1, 0.6, 1, 1.5]
 
     for count in range(len(C_values)):
         # Predictions are done with scaled values.
@@ -170,29 +165,6 @@ def rbf_svr_C(request):
     context = getSVMReportDump(t, r)
 
     return render(request, 'dashboard/svr_report.html', {'context': context})
-
-
-def is_left_increment(current_param_values, param_from):
-    if int(param_from) < current_param_values[0]:
-        return True
-    return False
-
-def is_left_decrease(current_param_values, param_from):
-    if int(param_from) > current_param_values[0]:
-        return True
-    return False
-
-def is_increase_series(current_param_values, new_param_list):
-    if len(new_param_list) >= len(current_param_values):
-        return True
-    return False
-
-
-def get_new_param_list(param_from, param_to):
-    new_param_list = list()
-    for count in range(int(param_from), int(param_to)+1):
-        new_param_list.append(count)
-    return new_param_list
 
 
 def update_report(request):
@@ -212,58 +184,19 @@ def update_report(request):
         return remove_info_from_linear_report(current_deg_values, new_param_list)
 
 
+
 def remove_info_from_linear_report(current_param_values, new_param_values):
     global current_deg_values
     global r
 
-    r.left_decrease = is_left_decrease(current_param_values, new_param_values[0])
+    r.left_update = is_left_decrease(current_param_values, new_param_values[0])
     values_to_remove = get_values_to_remove(current_param_values, new_param_values)
     alg_names_to_remove = get_alg_names_to_remove(values_to_remove)
-    updateTestResults_decrease(values_to_remove, alg_names_to_remove)
+    updateTestResults(values_to_remove, alg_names_to_remove, False)
     context = get_update_report_dump(r, alg_names_to_remove, False)
 
     current_deg_values = new_param_values
     return JsonResponse(context)
-
-
-def get_alg_names_to_remove(values_to_remove):
-    alg_names_to_remove = list()
-    for value_to_remove in values_to_remove:
-        alg_names_to_remove.append('Polynomial reg. deg=%s' % value_to_remove)
-    return alg_names_to_remove
-
-
-def updateTestResults_decrease(values_to_remove, alg_names_to_remove):
-    global r
-
-    for value_to_remove in values_to_remove:
-        if r.left_decrease:
-            r.norm_metrics_df.drop(r.norm_metrics_df.head(1).index,inplace=True)
-            r.raw_metrics_df.drop(r.raw_metrics_df.head(1).index,inplace=True)
-            r.mean_absolute_errors.pop(0)
-            r.mean_squared_errors.pop(0)
-            r.times_list.pop(0)
-            r.std_dev_list.pop(0)
-            r.report_df_list.pop(0)
-            r.error_ds.pop(0)
-
-        else:
-            r.norm_metrics_df.drop(r.norm_metrics_df.tail(1).index,inplace=True)
-            r.raw_metrics_df.drop(r.raw_metrics_df.tail(1).index,inplace=True)
-            r.mean_absolute_errors = r.mean_absolute_errors[:-1]
-            r.mean_squared_errors = r.mean_squared_errors[:-1]
-            r.times_list = r.times_list[:-1]
-            r.std_dev_list = r.std_dev_list[:-1]
-            r.report_df_list = r.report_df_list[:-1]
-            r.error_ds = r.error_ds[:-1]
-
-    r.alg_names_list = list(set(r.alg_names_list) - set(alg_names_to_remove))
-    r.alg_names_list.sort(key=sortDegree)
-
-
-def get_values_to_remove(current_param_values, new_param_values):
-    values_to_remove = list(set(current_param_values) - set(new_param_values))
-    return values_to_remove
 
 
 def increase_info_in_linear_report(new_param_list, current_param_values):
@@ -271,24 +204,28 @@ def increase_info_in_linear_report(new_param_list, current_param_values):
     global r
     new_alg_names = list()
 
-    r.left_increment = is_left_increment(current_deg_values, new_param_list[0])
-
+    r.left_update = is_left_increment(current_deg_values, new_param_list[0])
     new_values = list(set(new_param_list) - set(current_param_values))
-
-    if r.left_increment:
+    if r.left_update:
         new_values.reverse()
-
-    updateTestResults_increase(new_values, new_alg_names)
-
+    updateTestResults(new_values, new_alg_names, True)
     context = get_update_report_dump(r, new_alg_names, True)
 
     current_deg_values = new_param_list
-
     return JsonResponse(context)
 
-#no usages
-def updateTestResults_increase(new_values, new_alg_names):
+
+def updateTestResults(new_values, new_alg_names, increase):
+    if increase:
+        update_test_results_increase(new_values, new_alg_names)
+    else :
+        update_test_results_decrease(new_values, new_alg_names)
+
+
+
+def update_test_results_increase(new_values, new_alg_names):
     global r
+    global mean_df_week
 
     for new_value in new_values:
         # apply the polynomial transformation for a given degree and feature set.
@@ -300,3 +237,30 @@ def updateTestResults_increase(new_values, new_alg_names):
         alg_name = 'Polynomial reg. deg=%s' % new_value
         new_alg_names.append(alg_name)
         processLinearReg(t, r, predictions, alg_name)
+
+
+def update_test_results_decrease(new_values, new_alg_names):
+    global r
+    for value_to_remove in new_values:
+        if r.left_update:
+            r.norm_metrics_df.drop(r.norm_metrics_df.head(1).index, inplace=True)
+            r.raw_metrics_df.drop(r.raw_metrics_df.head(1).index, inplace=True)
+            r.mean_absolute_errors.pop(0)
+            r.mean_squared_errors.pop(0)
+            r.times_list.pop(0)
+            r.std_dev_list.pop(0)
+            r.report_df_list.pop(0)
+            r.error_ds.pop(0)
+
+        else:
+            r.norm_metrics_df.drop(r.norm_metrics_df.tail(1).index, inplace=True)
+            r.raw_metrics_df.drop(r.raw_metrics_df.tail(1).index, inplace=True)
+            r.mean_absolute_errors = r.mean_absolute_errors[:-1]
+            r.mean_squared_errors = r.mean_squared_errors[:-1]
+            r.times_list = r.times_list[:-1]
+            r.std_dev_list = r.std_dev_list[:-1]
+            r.report_df_list = r.report_df_list[:-1]
+            r.error_ds = r.error_ds[:-1]
+
+    r.alg_names_list = list(set(r.alg_names_list) - set(new_alg_names))
+    r.alg_names_list.sort(key=sortDegree)

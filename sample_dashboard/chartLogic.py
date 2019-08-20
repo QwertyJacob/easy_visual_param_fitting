@@ -31,8 +31,7 @@ class TestResults:
         self.report_df_list = list()
         self.norm_metrics_df = []
         self.raw_metrics_df = []
-        self.left_decrease = False
-        self.left_increment = False
+        self.left_update = False
 
 
 class SVMTestData:
@@ -353,9 +352,9 @@ def predictLinearReg(r,t,lm):
     predictions = lm.predict(t.X_test)
     predictions_df = pd.DataFrame({'HHMM': t.X_test[:, 1], 'bandwidth': predictions})
     predictions_df = predictions_df.sort_values(by=['HHMM'])
-    testResultAppend(r.predictions_df_list, predictions_df, r.left_increment)
+    testResultAppend(r.predictions_df_list, predictions_df, r.left_update)
     timetook = (timeit.default_timer() - start_time)
-    testResultAppend(r.times_list,timetook, r.left_increment)
+    testResultAppend(r.times_list,timetook, r.left_update)
     return predictions
 
 
@@ -409,11 +408,11 @@ def getTimeString(x):
 def processLinearReg(t, r, predictions, alg_name):
     # precision measures and indicators:
     errorList = t.y_test - predictions
-    testResultAppend(r.std_dev_list,statistics.stdev(errorList), r.left_increment)
-    testResultAppend(r.error_ds,pd.DataFrame(errorList), r.left_increment)
-    testResultAppend(r.mean_absolute_errors, metrics.mean_absolute_error(t.y_test, predictions), r.left_increment)
-    testResultAppend(r.mean_squared_errors, metrics.mean_squared_error(t.y_test, predictions), r.left_increment)
-    testResultAppend(r.alg_names_list, alg_name, r.left_increment)
+    testResultAppend(r.std_dev_list,statistics.stdev(errorList), r.left_update)
+    testResultAppend(r.error_ds,pd.DataFrame(errorList), r.left_update)
+    testResultAppend(r.mean_absolute_errors, metrics.mean_absolute_error(t.y_test, predictions), r.left_update)
+    testResultAppend(r.mean_squared_errors, metrics.mean_squared_error(t.y_test, predictions), r.left_update)
+    testResultAppend(r.alg_names_list, alg_name, r.left_update)
 
     # Try to get a more interesting table.
     hhmm_values = np.round(t.X_test[:,1]).flatten()
@@ -430,7 +429,7 @@ def processLinearReg(t, r, predictions, alg_name):
     value_prediction_error_DF = value_prediction_error_DF.round(1)
     value_prediction_error_DF['HHMM'] = value_prediction_error_DF['HHMM'].apply(
         lambda x: datetime.strptime(getTimeString(x), '%H%M.0').time())
-    testResultAppend(r.report_df_list,value_prediction_error_DF, r.left_increment)
+    testResultAppend(r.report_df_list,value_prediction_error_DF, r.left_update)
 
 
 def getSVMTestData(dataSetDF):
