@@ -34,6 +34,7 @@ class TestResults:
         self.left_update = False
         self.current_predictor = ''
         self.current_param_to_fit = ''
+        self.current_param_values = list()
 
 class SVMTestData:
     def __init__(self, X_train, X_test, y_train, y_test, original_df, svmScaler, svmDf_scaled):
@@ -61,6 +62,7 @@ predictors = ['Polynomial Regression', 'SVR with polynomial Kernel', 'SVR with R
 params_to_fit = ['deg','C','gamma','epsilon']
 
 def getSVMReportDump(t,r):
+
     ground_thruth_data = t.svmDf_scaled.tolist()
 
     predictionsChart = get_predictions_chart(ground_thruth_data, r.alg_names_list, r.predictions_df_list)
@@ -90,7 +92,8 @@ def getSVMReportDump(t,r):
                'error_charts': error_charts,
                'alg_names': tab_names,
                'predictor': r.current_predictor,
-               'param_to_fit': r.current_param_to_fit}
+               'param_to_fit': r.current_param_to_fit,
+               'current_param_values' : r.current_param_values }
 
     return context
 
@@ -251,8 +254,6 @@ def getLinRegReportDump(r, df):
 
     tab_names = get_tab_names(r)
 
-    #alg_filter_buttons_div = get_alg_filter_buttons_div(r, tab_names)
-
     context = {'predictionsChart': predictionsChart,
                'metricsChart': norm_metricsChart,
                'rawMetricsChart': rawMetricsChart,
@@ -260,7 +261,9 @@ def getLinRegReportDump(r, df):
                'error_charts': error_charts,
                'alg_names': tab_names,
                'predictor': r.current_predictor,
-               'param_to_fit': r.current_param_to_fit}
+               'param_to_fit': r.current_param_to_fit,
+               'current_param_values' : r.current_param_values}
+
     return context
 
 def sortDegree(alg_name):

@@ -4,7 +4,6 @@ from sample_dashboard.updateLogic import *
 from sklearn.linear_model import LinearRegression
 
 ########### GLOBAL VARS ###############################
-current_deg_values = [4, 5, 6, 7]
 mean_df_week = read_data('Week15minMeanNumericalLog')
 r = TestResults()
 t = getSVMTestData(mean_df_week)
@@ -20,24 +19,23 @@ def index(request):
 
 
 def poly_reg(request):
-    global current_deg_values
     global r
     # Notice that polynomic regression is made using a transformation of the predictor values as a predictor sample for
     # linear regression.
-    current_deg_values = [4, 5, 6, 7]
     r = TestResults()
+    r.current_param_values = [4, 5, 6, 7]
     r.current_predictor = predictors[0]
     r.current_param_to_fit = params_to_fit[0]
 
-    for count in range(len(current_deg_values)):
+    for count in range(len(r.current_param_values)):
         # apply the polinomial transformation for a given degree and feature set.
-        t_linear = getLinRegTestData(mean_df_week, current_deg_values[count])
+        t_linear = getLinRegTestData(mean_df_week, r.current_param_values[count])
 
         # apply the linear regression in the transformed featurespace.
         lm = LinearRegression()
         lm.fit(t_linear.X_train, t_linear.y_train)
         predictions = predictLinearReg(r, t_linear, lm)
-        alg_name = 'Polynomial reg. deg=%s' % current_deg_values[count]
+        alg_name = 'Polynomial reg. deg=%s' % r.current_param_values[count]
         processLinearReg(t_linear, r, predictions, alg_name)
 
     context = getLinRegReportDump(r, mean_df_week)
@@ -45,16 +43,15 @@ def poly_reg(request):
 
 
 def poly_svr_deg(request):
-    global current_deg_values
     global r
     r = TestResults()
-    current_deg_values = [4, 5, 6, 7]
+    r.current_param_values = [4, 5, 6, 7]
     r.current_predictor = predictors[1]
     r.current_param_to_fit = params_to_fit[0]
 
-    for count in range(len(current_deg_values)):
+    for count in range(len(r.current_param_values)):
         # Predictions are done with scaled values.
-        clf = SVR(gamma=5.2, C=10, epsilon=0.1, kernel='poly', degree=current_deg_values[count], coef0=1)
+        clf = SVR(gamma=5.2, C=10, epsilon=0.1, kernel='poly', degree=r.current_param_values[count], coef0=1)
         clf.fit(t.X_train, t.y_train)
         predictions = SVRpredict(r, t, clf)
         alg_name = 'SVR Poly K reg. deg=%s' % clf.degree
@@ -176,7 +173,6 @@ def rbf_svr_C(request):
 
 
 def update_report(request):
-    global current_deg_values
     global r
 
     param_to = request.GET.get('to', None)
@@ -186,23 +182,22 @@ def update_report(request):
 
     new_param_list = get_new_param_list(param_from, param_to)
 
-    increase_series = is_increase_series(current_deg_values, new_param_list)
+    increase_series = is_increase_series(r.current_param_values, new_param_list)
 
     return update_report_logic(new_param_list, increase_series)
 
 
 def update_report_logic(new_param_values, increase):
-    global current_deg_values
     global r
     context = None
     if r.current_param_to_fit == params_to_fit[0]:
         # valid for both polynomial reg & SVR with polynomial kernels.
-        r.left_update = is_left_update(current_deg_values, new_param_values[0], increase)
-        values_to_update = get_values_to_update(current_deg_values, new_param_values, increase)
+        r.left_update = is_left_update(r.current_param_values, new_param_values[0], increase)
+        values_to_update = get_values_to_update(r.current_param_values, new_param_values, increase)
         alg_names_to_update = get_alg_names_to_update(r,values_to_update)
         updateTestResults(r, values_to_update, alg_names_to_update, increase)
         context = get_update_report_dump(r, alg_names_to_update, increase)
-        current_deg_values = new_param_values
+        r.current_param_values = new_param_values
 
     return JsonResponse(context)
 

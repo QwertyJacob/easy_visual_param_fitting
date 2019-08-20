@@ -334,16 +334,16 @@ CB.change(function () {
     };
 
 
+    let paramSlider = $("#param_slider")
 
-
-  $("#degree_slider").ionRangeSlider({
+  paramSlider.ionRangeSlider({
         type: "double",
         grid: true,
         min: 0,
         max: 20,
         from: 4,
         to: 7,
-        prefix: "degree = ",
+        prefix: param_to_fit+" = ",
         onFinish: function (data) {
             predictionsChart.showLoading();
             rawMetricsChart.showLoading();
@@ -376,7 +376,7 @@ CB.change(function () {
 
     let degree_slider_loader = $('#degree_slider_loader');
     degree_slider_loader.hide();
-    $("#degree_slider").show();
+    paramSlider.show();
 
 
 });
