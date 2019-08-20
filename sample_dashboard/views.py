@@ -1,6 +1,7 @@
 from django.shortcuts import render
 from sklearn.svm import SVR
 from sample_dashboard.updateLogic import *
+from sklearn.linear_model import LinearRegression
 
 ########### GLOBAL VARS ###############################
 current_deg_values = [4, 5, 6, 7]
@@ -56,7 +57,7 @@ def poly_svr_deg(request):
         clf = SVR(gamma=5.2, C=10, epsilon=0.1, kernel='poly', degree=current_deg_values[count], coef0=1)
         clf.fit(t.X_train, t.y_train)
         predictions = SVRpredict(r, t, clf)
-        alg_name = 'SVR-Poly-K reg. deg=%s' % clf.degree
+        alg_name = 'SVR Poly K reg. deg=%s' % clf.degree
         processSVRReg(t, r, clf, predictions, alg_name)
 
     context = getSVMReportDump(t, r)
@@ -216,10 +217,7 @@ def updateTestResults(r, new_values, new_alg_names, increase):
         if r.current_predictor == predictors[1]:
             update_svr_test_results_increase(new_values, new_alg_names)
     else:
-        if r.current_predictor == predictors[0]:
-            update_linear_test_results_decrease(new_values, new_alg_names)
-        if r.current_predictor == predictors[1]:
-            update_svr_test_results_decrease(new_values, new_alg_names)
+        update_test_results_decrease(new_values, new_alg_names)
 
 
 def update_svr_test_results_increase(new_values, new_alg_names):
@@ -234,13 +232,6 @@ def update_svr_test_results_increase(new_values, new_alg_names):
         predictions = SVRpredict(r, t, clf)
         processSVRReg(t, r, clf, predictions, new_alg_names[index])
         index = index + 1
-
-
-
-
-#TODO complete
-def update_svr_test_results_decrease(new_values, new_alg_names):
-    return 0
 
 
 def update_linear_test_results_increase(new_values, new_alg_names):
@@ -258,8 +249,9 @@ def update_linear_test_results_increase(new_values, new_alg_names):
         index = index + 1
 
 
-def update_linear_test_results_decrease(new_values, new_alg_names):
+def update_test_results_decrease(new_values, new_alg_names):
     global r
+
     for value_to_remove in new_values:
         if r.left_update:
             r.norm_metrics_df.drop(r.norm_metrics_df.head(1).index, inplace=True)
@@ -271,7 +263,8 @@ def update_linear_test_results_decrease(new_values, new_alg_names):
             r.std_dev_list.pop(0)
             r.report_df_list.pop(0)
             r.error_ds.pop(0)
-
+            if r.current_predictor != predictors[0]:
+               r.sv_ratio_list.pop(0)
         else:
             r.norm_metrics_df.drop(r.norm_metrics_df.tail(1).index, inplace=True)
             r.raw_metrics_df.drop(r.raw_metrics_df.tail(1).index, inplace=True)
@@ -282,6 +275,8 @@ def update_linear_test_results_decrease(new_values, new_alg_names):
             r.report_df_list = r.report_df_list[:-1]
             r.error_ds = r.error_ds[:-1]
             r.predictions_df_list = r.predictions_df_list[:-1]
+            if r.current_predictor != predictors[0]:
+               r.sv_ratio_list =  r.sv_ratio_list[:-1]
 
     r.alg_names_list = list(set(r.alg_names_list) - set(new_alg_names))
     r.alg_names_list.sort(key=sortDegree)

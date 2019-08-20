@@ -32,7 +32,8 @@ class TestResults:
         self.norm_metrics_df = []
         self.raw_metrics_df = []
         self.left_update = False
-
+        self.current_predictor = ''
+        self.current_param_to_fit = ''
 
 class SVMTestData:
     def __init__(self, X_train, X_test, y_train, y_test, original_df, svmScaler, svmDf_scaled):
@@ -55,32 +56,28 @@ class LinRegTestData:
 
 
 linear_metric_names = ['mean_abs_err', 'mean_sqrd_err', 'std_dev', 'performance (negative)']
-
+svr_metric_names = ['mean_abs_err', 'mean_sqrd_err', 'std_dev', 'performance (negative)', 'sv ratio']
+predictors = ['Polynomial Regression', 'SVR with polynomial Kernel', 'SVR with RBF kernel']
+params_to_fit = ['deg','C','gamma','epsilon']
 
 def getSVMReportDump(t,r):
     ground_thruth_data = t.svmDf_scaled.tolist()
 
-    predictionsChart = getSVRPredictionsChart(ground_thruth_data, r.alg_names_list, r.predictions_df_list)
+    predictionsChart = get_predictions_chart(ground_thruth_data, r.alg_names_list, r.predictions_df_list)
 
     #errorDistrosChart = getErrorDistrosChart(r.predictions_df_list, r.error_ds, r.alg_names_list)
 
-    metric_names = ['mean_abs_err', 'mean_sqrd_err', 'std_dev', 'performance (negative)', 'sv ratio']
+    r.raw_metrics_df = get_raw_metrics_df(r, svr_metric_names)
+    # we should save somewhere  absolute values for a final exaustive comparison:
+    r.norm_metrics_df = get_norm_metrics_df(r, svr_metric_names)
 
-    poly_svr_metricsDf = pd.DataFrame(
-        list(zip(r.mean_absolute_errors, r.mean_squared_errors, r.std_dev_list, r.times_list, r.sv_ratio_list)),
-        index=r.alg_names_list,
-        columns=metric_names)
+    norm_metricsChart = getNormalizedMetricsChart(svr_metric_names, r)
 
-    # we save value absolute for a final exaustive comparison:
-    poly_svr_metricsDf_abs = poly_svr_metricsDf.copy()
-
-    norm_metricsChart = getNormalizedMetricsChart(metric_names, poly_svr_metricsDf, r.alg_names_list)
-
-    rawMetricsChart = getRawMetricsChart(metric_names, poly_svr_metricsDf_abs, r.alg_names_list)
+    rawMetricsChart = getRawMetricsChart(svr_metric_names, r.raw_metrics_df, r.alg_names_list)
 
     table_content = getTableTabsDiv(r)
 
-    error_charts =  get_error_charts(r)
+    error_charts = get_error_charts(r)
 
     tab_names = get_tab_names(r)
 
@@ -89,9 +86,11 @@ def getSVMReportDump(t,r):
     context = {'predictionsChart': predictionsChart,
                'metricsChart': norm_metricsChart,
                'rawMetricsChart': rawMetricsChart,
-               'table_data': table_content.render(),
+               'table_data': table_content,
                'error_charts': error_charts,
-               'alg_names': tab_names}
+               'alg_names': tab_names,
+               'predictor': r.current_predictor,
+               'param_to_fit': r.current_param_to_fit}
 
     return context
 
@@ -207,15 +206,19 @@ def getDescriptionPills(statistics):
 
 
 def get_raw_metrics_df(r, metric_names):
+    if len(metric_names) == 4:
+        metric_list = list(zip(r.mean_absolute_errors, r.mean_squared_errors, r.std_dev_list, r.times_list))
+    else:
+        metric_list = list(zip(r.mean_absolute_errors, r.mean_squared_errors, r.std_dev_list, r.times_list, r.sv_ratio_list))
 
-    poly_svr_metricsDf = pd.DataFrame(
-        list(zip(r.mean_absolute_errors, r.mean_squared_errors, r.std_dev_list, r.times_list)),
+    poly_svr_metricsDf = pd.DataFrame(metric_list,
         index=r.alg_names_list,
         columns=metric_names)
     return poly_svr_metricsDf
 
 
 def get_norm_metrics_df(r, metric_names):
+
     scaler = preprocessing.MaxAbsScaler()
     metricsDF_scaler = scaler.fit(r.raw_metrics_df)
     scaled_metrics_arr = metricsDF_scaler.transform(r.raw_metrics_df)
@@ -232,7 +235,7 @@ def getLinRegReportDump(r, df):
 
     ground_thruth_data = df[['HHMM', 'bandwidth']].values.tolist()
 
-    predictionsChart = getLinPredictionsChart(ground_thruth_data, r.alg_names_list, r.predictions_df_list)
+    predictionsChart = get_predictions_chart(ground_thruth_data, r.alg_names_list, r.predictions_df_list)
 
     r.raw_metrics_df = get_raw_metrics_df(r, linear_metric_names)
 
@@ -255,8 +258,9 @@ def getLinRegReportDump(r, df):
                'rawMetricsChart': rawMetricsChart,
                'table_data': table_content,
                'error_charts': error_charts,
-               'alg_names': tab_names}
-
+               'alg_names': tab_names,
+               'predictor': r.current_predictor,
+               'param_to_fit': r.current_param_to_fit}
     return context
 
 def sortDegree(alg_name):
@@ -269,9 +273,8 @@ def get_update_report_dump(r, new_alg_names, increase):
     normMetricsToAppend = list()
     rawMetricsToAppend = list()
 
-    if increase :
+    if increase:
         r.raw_metrics_df = get_raw_metrics_df(r, linear_metric_names)
-
         r.norm_metrics_df = get_norm_metrics_df(r, linear_metric_names)
 
         for alg_count in range(len(new_alg_names)):
@@ -325,6 +328,7 @@ def get_update_report_dump(r, new_alg_names, increase):
                'table_data': getTableTabsDiv(r),
                'errorCharts' : get_error_charts(r),
                'alg_names': tab_names}
+
     if not increase:
         context['alg_names_to_remove'] = new_alg_names
 
@@ -336,7 +340,7 @@ def SVRpredict(r, t, clf):
     start_time = timeit.default_timer()
     predictions = clf.predict(t.X_test)
     timetook = (timeit.default_timer() - start_time)
-    r.times_list.append(timetook)
+    testResultAppend(r.times_list,timetook, r.left_update)
     return predictions
 
 def testResultAppend(list, new_series, append_left):
@@ -364,7 +368,7 @@ def processSVRReg(t, r, clf, predictions, alg_name):
     predictions_df = test_df.copy()
     predictions_df['bandwidth'] = predictions
     predictions_df = predictions_df.sort_values(by=['HHMM'])
-    r.predictions_df_list.append(predictions_df)
+    testResultAppend(r.predictions_df_list,predictions_df,r.left_update)
 
     # We set back values to the original representation:
     test_df_scaled_back = t.svmScaler.inverse_transform(test_df)
@@ -373,13 +377,13 @@ def processSVRReg(t, r, clf, predictions, alg_name):
     predictions_reverse = predictions_df_scaled_back[:, [1]]
     # in order to keep real value metrics:
     sv_ratio = clf.support_.shape[0] / t.X_train.size
-    r.sv_ratio_list.append(sv_ratio)
+    testResultAppend(r.sv_ratio_list,sv_ratio,r.left_update)
     errorList = (y_test_reverse - predictions_reverse).flatten()
-    r.std_dev_list.append(statistics.stdev(errorList))
-    r.error_ds.append(pd.DataFrame(y_test_reverse - predictions_reverse))
-    r.mean_absolute_errors.append(metrics.mean_absolute_error(y_test_reverse, predictions_reverse))
-    r.mean_squared_errors.append(metrics.mean_squared_error(y_test_reverse, predictions_reverse))
-    r.alg_names_list.append(alg_name)
+    testResultAppend(r.std_dev_list,statistics.stdev(errorList),r.left_update)
+    testResultAppend(r.error_ds,pd.DataFrame(y_test_reverse - predictions_reverse), r.left_update)
+    testResultAppend(r.mean_absolute_errors, metrics.mean_absolute_error(y_test_reverse, predictions_reverse), r.left_update)
+    testResultAppend(r.mean_squared_errors, metrics.mean_squared_error(y_test_reverse, predictions_reverse), r.left_update)
+    testResultAppend(r.alg_names_list, alg_name, r.left_update)
 
     # Try to get a more interesting table.
     hhmm_values = np.round(test_df_scaled_back[:, [0]], 0).flatten()
@@ -394,7 +398,7 @@ def processSVRReg(t, r, clf, predictions, alg_name):
     value_prediction_error_DF = value_prediction_error_DF.sort_values(by=['HHMM'])
     value_prediction_error_DF = value_prediction_error_DF.round(1)
     value_prediction_error_DF['HHMM'] = value_prediction_error_DF['HHMM'].apply(lambda x: datetime.strptime(getTimeString(x), '%H%M.0').time())
-    r.report_df_list.append(value_prediction_error_DF)
+    testResultAppend(r.report_df_list,value_prediction_error_DF, r.left_update)
 
 
 def getTimeString(x):
@@ -466,74 +470,7 @@ def read_data(file_name):
     return pd.read_csv('data/med-output/' + file_name)
 
 
-
-def getSVRPredictionsChart(ground_thruth_data, alg_names_list, predictions_df_list):
-    series = list()
-
-    series_colors = ['#2f7ed8', '#0d233a', '#8bbc21', '#910000', '#1aadce',
-                     '#492970', '#f28f43', '#77a1e5', '#c42525', '#a6c96a']
-
-    ground_thruth = {
-        'name': 'Ground Truth',
-        'color': series_colors[0],
-        'data': ground_thruth_data}
-
-    series.append(ground_thruth)
-
-    for count in range(len(predictions_df_list)):
-        series.append(
-            {
-                'type': 'line',
-                'name': alg_names_list[count],
-                'color': series_colors[count+1],
-                'data': predictions_df_list[count].values.tolist(),
-                'lineWidth': 3,
-                'marker': {
-                    'enabled': False
-                },
-                'states': {
-                    'hover': {
-                        'lineWidth': 4
-                    }
-                },
-                'enableMouseTracking': True
-            }
-        )
-
-    predictionsChart = {
-        'chart': {'type': 'scatter', 'zoomType': 'xy'},
-        'mapNavigation': {
-            'enableMouseWheelZoom': True
-        },
-        'legend': {'enabled': True},
-        'title': {'text': '15 min mean bandwidth usage'},
-        'xAxis': {'title': {'enabled': True, 'text': 'Time (HHMM)'},
-                  'startOnTick': False,
-                  'endOnTick': False,
-                  'showLastLabel': True},
-        'yAxis': {'title': {'text': 'Usage'}},
-        'tooltip': {
-            'enabled':True,
-            'animation':True,
-            'valueSuffix': ''
-        },
-        'plotOptions': {
-            'column': {
-                'pointPadding': 0.2,
-                'borderWidth': 0
-            }
-        },
-        'series': series,
-        'credits': {
-            'enabled': False
-        }
-        }
-
-    predictionsChartDump = json.dumps(predictionsChart, separators=(',', ':'), sort_keys=True, indent=4)
-    return predictionsChartDump
-
-
-def getLinPredictionsChart(ground_thruth_data, alg_names_list, predictions_df_list):
+def get_predictions_chart(ground_thruth_data, alg_names_list, predictions_df_list):
     series = list()
 
     ground_thruth = {

@@ -3,25 +3,25 @@
    // metric_names = ['mean_abs_err', 'mean_sqrd_err', 'std_dev', 'performance (negative)']
 
 
-var  mean_abs_err_cb;
-var  mean_sqrd_err_cb;
-var  std_dev_cb;
-var  time_cb;
-var  sv_ratio_cb;
+let  mean_abs_err_cb;
+let  mean_sqrd_err_cb;
+let  std_dev_cb;
+let  time_cb;
+let  sv_ratio_cb;
 
 
-var  raw_mean_abs_err_cb;
-var  raw_mean_sqrd_err_cb;
-var  raw_std_dev_cb;
-var  raw_time_cb;
-var  raw_sv_ratio_cb;
-
+let  raw_mean_abs_err_cb;
+let  raw_mean_sqrd_err_cb;
+let  raw_std_dev_cb;
+let  raw_time_cb;
+let  raw_sv_ratio_cb;
 
 function sleep (time) {
   return new Promise((resolve) => setTimeout(resolve, time));
 }
 
 sleep(1000).then(() => {
+
 
 if(rawMetricChartLoaded){
     raw_mean_abs_err_cb = $('#raw_mean_abs_err_cb');
@@ -322,7 +322,7 @@ CB.change(function () {
 
     let decrease_report = function(data){
         for(alg_name_to_remove of data.alg_names_to_remove){
-            predictionsChart.get(alg_name_to_remove).remove()
+            predictionsChart.get(alg_name_to_remove).remove();
         }
 
         cleanMetricsCharts();
@@ -334,7 +334,9 @@ CB.change(function () {
     };
 
 
-  $(".js-range-slider").ionRangeSlider({
+
+
+  $("#degree_slider").ionRangeSlider({
         type: "double",
         grid: true,
         min: 0,
@@ -343,25 +345,38 @@ CB.change(function () {
         to: 7,
         prefix: "degree = ",
         onFinish: function (data) {
+            predictionsChart.showLoading();
+            rawMetricsChart.showLoading();
+            normalizedMetricsChart.showLoading();
 
              $.ajax({
                 url: '/ajax/update_report/',
                 data: {
                     'to': data.to,
-                    'from': data.from
+                    'from': data.from,
+                    'predictor' : predictor,
+                    'param_to_fit' : param_to_fit
                 },
                 dataType: 'json',
+
                 success: function (data) {
 
                     if(data.increase) increase_report(data);
                     else decrease_report(data);
-
+                    predictionsChart.hideLoading();
+                    rawMetricsChart.hideLoading();
+                    normalizedMetricsChart.hideLoading();
                 }
               });
 
         }
 
     });
+
+
+    let degree_slider_loader = $('#degree_slider_loader');
+    degree_slider_loader.hide();
+    $("#degree_slider").show();
 
 
 });

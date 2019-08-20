@@ -1,18 +1,12 @@
 from django.http import JsonResponse
 from sample_dashboard.chartLogic import *
-from sklearn.linear_model import LinearRegression
 
 
-def is_left_increment(current_param_values, param_from):
-    if int(param_from) < current_param_values[0]:
-        return True
-    return False
-
-
-def is_left_decrease(current_param_values, param_from):
-    if int(param_from) > current_param_values[0]:
-        return True
-    return False
+def is_left_update(current_param_values, param_from, increment):
+    if increment:
+        return int(param_from) < current_param_values[0]
+    else:
+        return int(param_from) > current_param_values[0]
 
 
 def is_increase_series(current_param_values, new_param_list):
@@ -28,15 +22,20 @@ def get_new_param_list(param_from, param_to):
     return new_param_list
 
 
-def get_alg_names_to_remove(values_to_remove):
-    alg_names_to_remove = list()
-    for value_to_remove in values_to_remove:
-        alg_names_to_remove.append('Polynomial reg. deg=%s' % value_to_remove)
-    return alg_names_to_remove
+def get_alg_names_to_update(r, values_to_update):
+    alg_names_to_update = list()
+    for value_to_update in values_to_update:
+        if r.current_predictor == predictors[0]:
+            alg_names_to_update.append('Polynomial reg. deg=%s' % value_to_update)
+        if r.current_predictor == predictors[1]:
+            alg_names_to_update.append('SVR Poly K reg. deg=%s' % value_to_update)
+    return alg_names_to_update
 
 
-def get_values_to_remove(current_param_values, new_param_values):
-    values_to_remove = list(set(current_param_values) - set(new_param_values))
-    return values_to_remove
+def get_values_to_update(current_param_values, new_param_values, increment):
+    if increment :
+        return list(set(new_param_values) - set(current_param_values))
+    else:
+        return list(set(current_param_values) - set(new_param_values))
 
 

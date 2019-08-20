@@ -5,21 +5,29 @@
       {% block extra_head_imports %}
           <!--script type="text/javascript">{% javascript_settings %}</script-->
         <link rel="stylesheet" href="{% static "css/fancyCheckBoxes.css" %}">
+          <link rel="stylesheet" href="{% static "css/fancy_loaders.css" %}">
+
+
       {% endblock extra_head_imports %}
 
 
-{% block tittle %} <h1 style="margin-top: 100px" > Saved Report:</h1>
+{% block tittle %}
+
+
 {% endblock tittle%}
 
 {% block body %}
 
-    <div class="row">
+    <div class="row" style="padding-top: 40px">
         <div class="col-sm-7">
             <h4 class="pt-4">Algorithm predictions plot:</h4>
-            <input type="text" class="js-range-slider" name="my_range" value="" />
+
+            <div  id="degree_slider_loader" class="little_loader" style="margin-inline-start: 350px "></div>
+            <input hidden="true" id="degree_slider" type="text" class="js-range-slider" name="my_range" value="" />
             {{context.algorithmFilterButtons| safe}}
 
-            <div class="border" id="container" style=" max-height: 500px;"></div>
+            <div class="border" id="container" style=" max-height: 500px;">
+            </div>
         </div>
          <div class="col-sm-4">
             <h4 class="pt-4">Algorithm comparison metrics:</h4>
@@ -58,14 +66,17 @@
 {% block scriptWork %}
 
 <script>
-    var errorCharts = {{ context.error_charts | safe}}
+    var errorCharts = {{ context.error_charts | safe}};
     var predictionsChart = Highcharts.chart('container', {{ context.predictionsChart |safe }});
     var normalizedMetricsChart = Highcharts.chart('metricsChartContainer', {{ context.metricsChart|safe }});
     var normalizedMetricChartLoaded = true;
     var rawMetricsChart = Highcharts.chart('rawMetricsChartContainer',{{ context.rawMetricsChart|safe }});
     var rawMetricChartLoaded = true;
     var errorChartsLoaded = true;
-    var algoritm_names = {{context.alg_names | safe }}
+    var algoritm_names = {{context.alg_names | safe }};
+    var predictor = "{{context.predictor }}";
+    var param_to_fit = "{{context.param_to_fit}}";
+
 </script>
 
         <script type="text/javascript" src="{% static "chartLogic.js" %}"></script>
