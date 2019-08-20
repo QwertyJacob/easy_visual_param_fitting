@@ -16,6 +16,9 @@ let  raw_std_dev_cb;
 let  raw_time_cb;
 let  raw_sv_ratio_cb;
 
+let predictors = ['Polynomial Regression', 'SVR with polynomial Kernel', 'SVR with RBF kernel'];
+let params_to_fit = ['deg','C','gamma','epsilon'];
+
 function sleep (time) {
   return new Promise((resolve) => setTimeout(resolve, time));
 }
@@ -198,7 +201,7 @@ if (errorChartsLoaded){
         errorCharts[i].credits.enabled = false;
         errorCharts[i].series[2].showInLegend = false;
         errorCharts[i].series[2].visible = false;
-         Highcharts.chart(algoritm_names[i]+'-chart-div', errorCharts[i]);
+         Highcharts.chart(algorithm_names[i]+'-chart-div', errorCharts[i]);
     }
 }
 
@@ -334,15 +337,95 @@ CB.change(function () {
     };
 
 
-    let paramSlider = $("#param_slider")
+    let paramSlider = $("#param_slider");
+
+    let getMinSliderValue = function (){
+        if(predictor === predictors[0] || predictor === predictors[1]){
+            switch (param_to_fit) {
+            case params_to_fit[0]://degree
+                return 1;
+            case params_to_fit[1]://C
+                return 1;
+            case params_to_fit[2]://gamma
+                return 4.5;
+            case params_to_fit[3]://epsilon
+                return 0.08;
+            }
+        }else{
+            switch (param_to_fit) {
+            case params_to_fit[0]://degree
+                return 1;
+            case params_to_fit[1]://C
+                return 1;
+            case params_to_fit[2]://gamma
+                return 4.5;
+            case params_to_fit[3]://epsilon
+                return 0.01;
+            }
+        }
+    };
+
+    let getMaxSliderValue = function (){
+        if(predictor === predictors[0] || predictor === predictors[1]){
+            switch (param_to_fit) {
+                case params_to_fit[0]://degree
+                    return 15;
+                case params_to_fit[1]://C
+                    return 40;
+                case params_to_fit[2]://gamma
+                    return 5.5;
+                case params_to_fit[3]://epsilon
+                    return 0.1;
+            }
+        }else{
+             switch (param_to_fit) {
+                case params_to_fit[0]://degree
+                    return 15;
+                case params_to_fit[1]://C
+                    return 20;
+                case params_to_fit[2]://gamma
+                    return 5.5;
+                case params_to_fit[3]://epsilon
+                    return 0.2;
+            }
+        }
+      };
+
+    let getStepSliderValue = function (){
+            if(predictor === predictors[0] || predictor === predictors[1]){
+                switch (param_to_fit) {
+                    case params_to_fit[0]://degree
+                        return 1;
+                    case params_to_fit[1]://C
+                        return 2;
+                    case params_to_fit[2]://gamma
+                        return 0.1;
+                    case params_to_fit[3]://epsilon
+                        return 0.002;
+                }
+            }else{
+                switch (param_to_fit) {
+                    case params_to_fit[0]://degree
+                        return 1;
+                    case params_to_fit[1]://C
+                        return 1;
+                    case params_to_fit[2]://gamma
+                        return 0.1;
+                    case params_to_fit[3]://epsilon
+                        return 0.01;
+                }
+            }
+        };
+
 
   paramSlider.ionRangeSlider({
         type: "double",
         grid: true,
-        min: 0,
-        max: 20,
-        from: 4,
-        to: 7,
+        min: getMinSliderValue(),
+        max: getMaxSliderValue(),
+        step: getStepSliderValue(),
+        from: current_param_values[0],
+        to: current_param_values[current_param_values.length-1],
         prefix: param_to_fit+" = ",
         onFinish: function (data) {
             predictionsChart.showLoading();

@@ -2,6 +2,7 @@ from django.shortcuts import render
 from sklearn.svm import SVR
 from sample_dashboard.updateLogic import *
 from sklearn.linear_model import LinearRegression
+from django.http import JsonResponse
 
 ########### GLOBAL VARS ###############################
 mean_df_week = read_data('Week15minMeanNumericalLog')
@@ -63,15 +64,15 @@ def poly_svr_deg(request):
 
 
 def poly_svr_gamma(request):
+    global r
     r = TestResults()
+    r.current_param_values = [5.25, 5.2, 5.1, 5]
+    r.current_predictor = predictors[1]
+    r.current_param_to_fit = params_to_fit[2]
 
-    t = getSVMTestData(mean_df_week)
-
-    gamma_values = [5.25, 5.2, 5.1, 5]
-
-    for count in range(len(gamma_values)):
+    for count in range(len(r.current_param_values)):
         # Predictions are done with scaled values.
-        clf = SVR(gamma=gamma_values[count], C=10, epsilon=0.1, kernel='poly', degree=7, coef0=1)
+        clf = SVR(gamma=r.current_param_values[count], C=10, epsilon=0.1, kernel='poly', degree=7, coef0=1)
         clf.fit(t.X_train, t.y_train)
         predictions = SVRpredict(r, t, clf)
         alg_name = 'SVR poly gamma=%s' % clf.gamma
@@ -83,13 +84,15 @@ def poly_svr_gamma(request):
 
 
 def poly_svr_epsilon(request):
+    global r
     r = TestResults()
-    t = getSVMTestData(mean_df_week)
-    epsilon_values = [0.1, 0.095, 0.09, 0.085]
+    r.current_param_values = [0.1, 0.095, 0.09, 0.085]
+    r.current_predictor = predictors[1]
+    r.current_param_to_fit = params_to_fit[3]
 
-    for count in range(len(epsilon_values)):
+    for count in range(len(r.current_param_values)):
         # Predictions are done with scaled values.
-        clf = SVR(gamma=5.2, C=10, epsilon=epsilon_values[count], kernel='poly', degree=7, coef0=1)
+        clf = SVR(gamma=5.2, C=10, epsilon=r.current_param_values[count], kernel='poly', degree=7, coef0=1)
         clf.fit(t.X_train, t.y_train)
         predictions = SVRpredict(r, t, clf)
         alg_name = 'SVR poly7 epsilon=%s' % clf.epsilon
@@ -101,13 +104,15 @@ def poly_svr_epsilon(request):
 
 
 def poly_svr_C(request):
+    global r
     r = TestResults()
-    t = getSVMTestData(mean_df_week)
-    C_values = [1, 5, 10, 15, 20]
+    r.current_param_values = [1, 5, 10, 15, 20]
+    r.current_predictor = predictors[1]
+    r.current_param_to_fit = params_to_fit[1]
 
-    for count in range(len(C_values)):
+    for count in range(len(r.current_param_values)):
         # Predictions are done with scaled values.
-        clf = SVR(gamma=5.2, C=C_values[count], epsilon=0.1, kernel='poly', degree=7, coef0=1)
+        clf = SVR(gamma=5.2, C=r.current_param_values[count], epsilon=0.1, kernel='poly', degree=7, coef0=1)
         clf.fit(t.X_train, t.y_train)
         predictions = SVRpredict(r, t, clf)
         alg_name = 'SVR poly C=%s' % clf.C
@@ -119,13 +124,15 @@ def poly_svr_C(request):
 
 
 def rbf_svr_gamma(request):
+    global r
     r = TestResults()
-    t = getSVMTestData(mean_df_week)
-    gamma_values = [5.25, 5.2, 5.1, 5]
+    r.current_param_values = [5.25, 5.2, 5.1, 5]
+    r.current_predictor = predictors[2]
+    r.current_param_to_fit = params_to_fit[2]
 
-    for count in range(len(gamma_values)):
+    for count in range(len(r.current_param_values)):
         # Predictions are done with scaled values.
-        clf = SVR(gamma=gamma_values[count], C=10, epsilon=0.1, kernel='poly', degree=7, coef0=1)
+        clf = SVR(gamma=r.current_param_values[count], C=10, epsilon=0.1, kernel='poly', degree=7, coef0=1)
         clf.fit(t.X_train, t.y_train)
         predictions = SVRpredict(r, t, clf)
         alg_name = 'SVR RBF gamma=%s' % clf.gamma
@@ -137,13 +144,15 @@ def rbf_svr_gamma(request):
 
 
 def rbf_svr_epsilon(request):
+    global r
     r = TestResults()
-    t = getSVMTestData(mean_df_week)
-    epsilon_values = [0.01, 0.03, 0.05, 0.08, 0.1]
+    r.current_param_values = [0.01, 0.03, 0.05, 0.08, 0.1]
+    r.current_predictor = predictors[2]
+    r.current_param_to_fit = params_to_fit[3]
 
-    for count in range(len(epsilon_values)):
+    for count in range(len(r.current_param_values)):
         # Predictions are done with scaled values.
-        clf = SVR(gamma=20, C=0.9, epsilon=epsilon_values[count])
+        clf = SVR(gamma=20, C=0.9, epsilon=r.current_param_values[count])
         clf.fit(t.X_train, t.y_train)
         predictions = SVRpredict(r, t, clf)
         alg_name = ' SVR (RBF C=0.9) | epsilon value =%s ' % clf.epsilon
@@ -155,13 +164,16 @@ def rbf_svr_epsilon(request):
 
 
 def rbf_svr_C(request):
+    global r
     r = TestResults()
-    t = getSVMTestData(mean_df_week)
-    C_values = [0.1, 0.6, 1, 1.5]
+    r.current_param_values = [0.1, 0.6, 1, 1.5]
+    r.current_predictor = predictors[2]
+    r.current_param_to_fit = params_to_fit[1]
 
-    for count in range(len(C_values)):
+
+    for count in range(len(r.current_param_values)):
         # Predictions are done with scaled values.
-        clf = SVR(gamma=20, C=C_values[count])
+        clf = SVR(gamma=20, C=r.current_param_values[count])
         clf.fit(t.X_train, t.y_train)
         predictions = SVRpredict(r, t, clf)
         alg_name = 'SVR Rbf-k,  gamma=20, C value=%s' % clf.C

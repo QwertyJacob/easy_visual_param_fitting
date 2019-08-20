@@ -1,4 +1,3 @@
-from django.http import JsonResponse
 from sample_dashboard.chartLogic import *
 
 
