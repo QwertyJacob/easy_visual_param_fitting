@@ -31,6 +31,9 @@ class TestResults:
         self.report_df_list = list()
         self.norm_metrics_df = []
         self.raw_metrics_df = []
+        self.left_decrease = False
+        self.left_increment = False
+
 
 class SVMTestData:
     def __init__(self, X_train, X_test, y_train, y_test, original_df, svmScaler, svmDf_scaled):
@@ -41,7 +44,7 @@ class SVMTestData:
         self.original_df = original_df
         self.svmScaler = svmScaler
         self.svmDf_scaled = svmDf_scaled
-        self.left_decrease = False
+
 
 
 class LinRegTestData:
@@ -50,7 +53,6 @@ class LinRegTestData:
         self.X_test = X_test
         self.y_train = y_train
         self.y_test = y_test
-        self.left_increment = False
 
 
 linear_metric_names = ['mean_abs_err', 'mean_sqrd_err', 'std_dev', 'performance (negative)']
@@ -262,10 +264,34 @@ def sortDegree(alg_name):
     return re.findall(r'\d+', alg_name)[0]
 
 
-def get_update_report_dump_decrease(r, alg_names_to_remove):
+def get_update_report_dump(r, new_alg_names, increase):
 
+    predictionsToAppend = list()
     normMetricsToAppend = list()
     rawMetricsToAppend = list()
+
+    if increase :
+        r.raw_metrics_df = get_raw_metrics_df(r, linear_metric_names)
+
+        r.norm_metrics_df = get_norm_metrics_df(r, linear_metric_names)
+
+        for alg_count in range(len(new_alg_names)):
+            predictionsToAppend.append({
+                'type': 'line',
+                'name': new_alg_names[alg_count],
+                'id': new_alg_names[alg_count],
+                'data': r.predictions_df_list[len(r.alg_names_list) - len(new_alg_names)].values.tolist(),
+                'lineWidth': 3,
+                'marker': {
+                    'enabled': False
+                },
+                'states': {
+                    'hover': {
+                        'lineWidth': 4
+                    }
+                },
+                'enableMouseTracking': True
+            })
 
     for metric_count in range(len(linear_metric_names)):
         normMetricsToAppend.append(
@@ -292,75 +318,19 @@ def get_update_report_dump_decrease(r, alg_names_to_remove):
 
     tab_names = get_tab_names(r)
 
-    context = {'alg_names_to_remove': alg_names_to_remove,
+    context = {'increase': increase,
                'alg_names_list': r.alg_names_list,
+               'predictionsToAppend': predictionsToAppend,
                'normMetricsToAppend': normMetricsToAppend,
                'rawMetricsToAppend': rawMetricsToAppend,
-               'increase': False,
                'table_data': getTableTabsDiv(r),
                'errorCharts' : get_error_charts(r),
                'alg_names': tab_names}
+    if not increase:
+        context['alg_names_to_remove'] = new_alg_names
 
     return context
 
-
-def getLinRegReportDumpDelta(r, new_alg_names):
-
-    predictionsToAppend = list()
-    normMetricsToAppend = list()
-    rawMetricsToAppend = list()
-
-    r.raw_metrics_df = get_raw_metrics_df(r, linear_metric_names)
-
-    r.norm_metrics_df = get_norm_metrics_df(r, linear_metric_names)
-
-    for alg_count in range(len(new_alg_names)):
-        predictionsToAppend.append({
-                'type': 'line',
-                'name': new_alg_names[alg_count],
-                'data': r.predictions_df_list[len(r.alg_names_list) - len(new_alg_names)].values.tolist(),
-                'lineWidth': 3,
-                'marker': {
-                    'enabled': False
-                },
-                'states': {
-                    'hover': {
-                        'lineWidth': 4
-                    }
-                },
-                'enableMouseTracking': True
-            })
-
-    for metric_count in range(len(linear_metric_names)):
-        normMetricsToAppend.append( {
-                'name': linear_metric_names[metric_count],
-                'data': r.norm_metrics_df[linear_metric_names[metric_count]].tolist(),
-                'visible': True
-            })
-        rawMetricsToAppend.append(
-            {
-                'name': linear_metric_names[metric_count],
-                'data': r.raw_metrics_df[linear_metric_names[metric_count]].tolist(),
-                'visible': True
-            }
-        )
-        rawMetricsToAppend.append(
-            {
-                'name': linear_metric_names[metric_count] + "line",
-                'showInLegend': False,
-                'data': r.raw_metrics_df[linear_metric_names[metric_count]].tolist(),
-                'visible': True,
-                'type': 'line'
-            })
-
-    context = {'increase': True,
-                'predictionsToAppend': predictionsToAppend,
-               'normMetricsToAppend': normMetricsToAppend,
-               'rawMetricsToAppend': rawMetricsToAppend,
-               'alg_names_list' : r.alg_names_list,
-               }
-
-    return context
 
 def SVRpredict(r, t, clf):
     # Scaled values permit us to optimize performance
@@ -383,9 +353,9 @@ def predictLinearReg(r,t,lm):
     predictions = lm.predict(t.X_test)
     predictions_df = pd.DataFrame({'HHMM': t.X_test[:, 1], 'bandwidth': predictions})
     predictions_df = predictions_df.sort_values(by=['HHMM'])
-    testResultAppend(r.predictions_df_list, predictions_df, t.left_increment)
+    testResultAppend(r.predictions_df_list, predictions_df, r.left_increment)
     timetook = (timeit.default_timer() - start_time)
-    testResultAppend(r.times_list,timetook, t.left_increment)
+    testResultAppend(r.times_list,timetook, r.left_increment)
     return predictions
 
 
@@ -439,11 +409,11 @@ def getTimeString(x):
 def processLinearReg(t, r, predictions, alg_name):
     # precision measures and indicators:
     errorList = t.y_test - predictions
-    testResultAppend(r.std_dev_list,statistics.stdev(errorList), t.left_increment)
-    testResultAppend(r.error_ds,pd.DataFrame(errorList), t.left_increment)
-    testResultAppend(r.mean_absolute_errors, metrics.mean_absolute_error(t.y_test, predictions),t.left_increment)
-    testResultAppend(r.mean_squared_errors, metrics.mean_squared_error(t.y_test, predictions), t.left_increment)
-    testResultAppend(r.alg_names_list, alg_name, t.left_increment)
+    testResultAppend(r.std_dev_list,statistics.stdev(errorList), r.left_increment)
+    testResultAppend(r.error_ds,pd.DataFrame(errorList), r.left_increment)
+    testResultAppend(r.mean_absolute_errors, metrics.mean_absolute_error(t.y_test, predictions), r.left_increment)
+    testResultAppend(r.mean_squared_errors, metrics.mean_squared_error(t.y_test, predictions), r.left_increment)
+    testResultAppend(r.alg_names_list, alg_name, r.left_increment)
 
     # Try to get a more interesting table.
     hhmm_values = np.round(t.X_test[:,1]).flatten()
@@ -460,7 +430,7 @@ def processLinearReg(t, r, predictions, alg_name):
     value_prediction_error_DF = value_prediction_error_DF.round(1)
     value_prediction_error_DF['HHMM'] = value_prediction_error_DF['HHMM'].apply(
         lambda x: datetime.strptime(getTimeString(x), '%H%M.0').time())
-    testResultAppend(r.report_df_list,value_prediction_error_DF, t.left_increment)
+    testResultAppend(r.report_df_list,value_prediction_error_DF, r.left_increment)
 
 
 def getSVMTestData(dataSetDF):

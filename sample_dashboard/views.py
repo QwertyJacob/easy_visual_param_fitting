@@ -207,8 +207,7 @@ def update_report(request):
     increase_series = is_increase_series(current_deg_values, new_param_list)
 
     if increase_series:
-        local_left_increment = is_left_increment(current_deg_values, degree_from)
-        return increase_info_in_linear_report(new_param_list, current_deg_values, local_left_increment)
+        return increase_info_in_linear_report(new_param_list, current_deg_values)
     else:
         return remove_info_from_linear_report(current_deg_values, new_param_list)
 
@@ -221,7 +220,7 @@ def remove_info_from_linear_report(current_param_values, new_param_values):
     values_to_remove = get_values_to_remove(current_param_values, new_param_values)
     alg_names_to_remove = get_alg_names_to_remove(values_to_remove)
     updateTestResults_decrease(values_to_remove, alg_names_to_remove)
-    context = get_update_report_dump_decrease(r, alg_names_to_remove)
+    context = get_update_report_dump(r, alg_names_to_remove, False)
 
     current_deg_values = new_param_values
     return JsonResponse(context)
@@ -267,21 +266,33 @@ def get_values_to_remove(current_param_values, new_param_values):
     return values_to_remove
 
 
-def increase_info_in_linear_report(new_param_list, current_param_values,local_left_increment):
+def increase_info_in_linear_report(new_param_list, current_param_values):
     global current_deg_values
     global r
-
     new_alg_names = list()
+
+    r.left_increment = is_left_increment(current_deg_values, new_param_list[0])
+
     new_values = list(set(new_param_list) - set(current_param_values))
-    if local_left_increment:
+
+    if r.left_increment:
         new_values.reverse()
 
+    updateTestResults_increase(new_values, new_alg_names)
+
+    context = get_update_report_dump(r, new_alg_names, True)
+
     current_deg_values = new_param_list
+
+    return JsonResponse(context)
+
+#no usages
+def updateTestResults_increase(new_values, new_alg_names):
+    global r
 
     for new_value in new_values:
         # apply the polynomial transformation for a given degree and feature set.
         t = getLinRegTestData(mean_df_week, new_value)
-        t.left_increment = local_left_increment
         # apply the linear regression in the transformed feature space.
         lm = LinearRegression()
         lm.fit(t.X_train, t.y_train)
@@ -289,7 +300,3 @@ def increase_info_in_linear_report(new_param_list, current_param_values,local_le
         alg_name = 'Polynomial reg. deg=%s' % new_value
         new_alg_names.append(alg_name)
         processLinearReg(t, r, predictions, alg_name)
-
-    context = getLinRegReportDumpDelta(r, new_alg_names)
-
-    return JsonResponse(context)

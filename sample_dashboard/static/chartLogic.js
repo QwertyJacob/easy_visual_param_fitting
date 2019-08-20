@@ -317,7 +317,7 @@ CB.change(function () {
 
         resetMetricButtons();
 
-        //update_error_div(data);
+        update_error_div(data);
     };
 
     let decrease_report = function(data){
