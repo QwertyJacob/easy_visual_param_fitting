@@ -1,0 +1,91 @@
+{% extends "dashboard/dashboard.html" %}
+{% load static %}
+
+{% block extra_head_imports %}
+   <style type="text/css">
+      #user_form fieldset:not(:first-of-type) {
+        display: none;
+      }
+    </style>
+{% endblock extra_head_imports %}
+
+{% block tittle %}
+ <h1 style="margin-top: 100px" > Chose evaluation parameters:</h1>
+ {% endblock tittle %}
+
+{% block body %}
+<div class="container">
+	<h2>Parameter fitting evaluation process:</h2>
+	<div class="progress">
+	<div class="progress-bar progress-bar-striped active" role="progressbar" aria-valuemin="0" aria-valuemax="100"></div>
+	</div>
+	<div class="alert alert-success hide"></div>
+	<form id="user_form" novalidate action="report.html"  method="post">
+	<fieldset>
+	<h2>Step 1: Chose estimator</h2>
+        <div>
+          <div class="form-check">
+            <input name="gruppo1" type="radio" id="radio1" checked>
+            <label for="radio1">Polynomial Regression</label>
+          </div>
+          <div class="form-check">
+            <input name="gruppo1" type="radio" id="radio2">
+            <label for="radio2">SVR with polynomial kernels </label>
+          </div>
+          <div class="form-check">
+            <input name="gruppo1" type="radio" id="radio2">
+            <label for="radio2">SVR with RBF kernels</label>
+          </div>
+        </div>
+
+	<input type="button" class="next btn btn-info" value="Next" />
+	</fieldset>
+	<fieldset>
+	<h2> Step 2: Chose parameter</h2>
+        <div>
+          <div class="form-check">
+            <input name="gruppo1" type="radio" id="radio1" checked>
+            <label for="radio1">C penalty parameter</label>
+          </div>
+          <div class="form-check">
+            <input name="gruppo1" type="radio" id="radio2">
+            <label for="radio2">Gamma kernel coefficient</label>
+          </div>
+          <div class="form-check">
+            <input name="gruppo1" type="radio" id="radio2">
+            <label for="radio2">Epsilon</label>
+          </div>
+            <div class="form-check">
+            <input name="gruppo1" type="radio" id="radio2">
+            <label for="radio2">Polynome degree</label>
+          </div>
+        </div>
+
+
+	<input type="button" name="previous" class="previous btn btn-default" value="Previous" />
+	<input type="button" name="next" class="next btn btn-info" value="Next" />
+	</fieldset>
+
+	<fieldset>
+	<h2>Step 3: Parameter range variation: </h2>
+	<div class="form-group">
+
+        <label  id="ex18-label-1" class="hidden" for="ex18a"></label><input id="ex18a" type="text"/>
+
+
+	<span id="ex18-label-2a" class="hidden">Example low value</span>
+    <span id="ex18-label-2b" class="hidden">Example high value</span>
+    <input id="ex18b" type="text"/>
+
+	</div>
+	<input type="button" name="previous" class="previous btn btn-default" value="Previous" />
+	<input type="submit" name="submit" class="submit btn btn-success" value="Submit" />
+	</fieldset>
+	</form>
+</div>
+
+{% endblock body %}
+
+{% block scriptWork %}
+ <script src="{% static "paramSelectionLogic.js" %}"></script>
+{% endblock scriptWork %}

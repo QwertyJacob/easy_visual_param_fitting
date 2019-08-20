@@ -1,0 +1,73 @@
+{% extends "dashboard/dashboard.html" %}
+{% load static %}
+{% load javascript_settings_tags %}
+
+      {% block extra_head_imports %}
+          <!--script type="text/javascript">{% javascript_settings %}</script-->
+        <link rel="stylesheet" href="{% static "css/fancyCheckBoxes.css" %}">
+      {% endblock extra_head_imports %}
+
+
+{% block tittle %} <h1 style="margin-top: 100px" > Saved Report:</h1>
+{% endblock tittle%}
+
+{% block body %}
+
+    <div class="row">
+        <div class="col-sm-7">
+            <h4 class="pt-4">Algorithm predictions plot:</h4>
+            <input type="text" class="js-range-slider" name="my_range" value="" />
+            {{context.algorithmFilterButtons| safe}}
+
+            <div class="border" id="container" style=" max-height: 500px;"></div>
+        </div>
+         <div class="col-sm-4">
+            <h4 class="pt-4">Algorithm comparison metrics:</h4>
+            <ul class="nav nav-tabs" role="tablist">
+                <li class="nav-item">
+                    <a class="nav-link active" data-toggle="tab" href="#normalized-metrics-tab-pane">Normalized Metrics</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" data-toggle="tab" href="#raw-metrics-tab-pane">Raw Metrics</a>
+                </li>
+            </ul>
+             <div class="tab-content">
+                 <div class="tab-pane active" id="normalized-metrics-tab-pane">
+                    {% block norm_metrics_commands %}
+                    {% endblock norm_metrics_commands %}
+                    <div class="border" id="metricsChartContainer" style=" height: 400px;"></div>
+                 </div>
+                 <div class="tab-pane" id="raw-metrics-tab-pane">
+                    {% block raw_metrics_commands %}
+                    {% endblock raw_metrics_commands %}
+                    <div class="border" id="rawMetricsChartContainer"style="height: 400px; "></div>
+                 </div>
+             </div>
+        </div>
+    </div>
+    <div class="row">
+    <div class="col-sm-11">
+        <h4>Error distributions:</h4>
+        <div id="table_data_div" >
+            {{context.table_data| safe}}
+        </div>
+    </div>
+    </div><!-- nested row-->
+{% endblock body %}
+
+{% block scriptWork %}
+
+<script>
+    var errorCharts = {{ context.error_charts | safe}}
+    var predictionsChart = Highcharts.chart('container', {{ context.predictionsChart |safe }});
+    var normalizedMetricsChart = Highcharts.chart('metricsChartContainer', {{ context.metricsChart|safe }});
+    var normalizedMetricChartLoaded = true;
+    var rawMetricsChart = Highcharts.chart('rawMetricsChartContainer',{{ context.rawMetricsChart|safe }});
+    var rawMetricChartLoaded = true;
+    var errorChartsLoaded = true;
+    var algoritm_names = {{context.alg_names | safe }}
+</script>
+
+        <script type="text/javascript" src="{% static "chartLogic.js" %}"></script>
+
+{% endblock scriptWork %}

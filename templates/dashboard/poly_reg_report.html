@@ -1,0 +1,43 @@
+{% extends "dashboard/report.html" %}
+{% load static %}
+
+
+
+{% block norm_metrics_commands %}
+    <label class="btn" style="color: #fff; background-color: #90ED7D;"> Standard Deviation
+    <input type="checkbox" id="norm_std_dev_cb" value="std_dev" class="badgebox" checked>
+    <span class="badge" style="background-color: white; color: #90ED7D;">&check;</span>
+    </label>
+    <label class="btn" style="color: #fff; background-color: #434348;"> Mean squared error
+    <input type="checkbox" id="norm_mean_sqrd_err_cb" value="mean_sqrd_err" class="badgebox" checked>
+    <span class="badge" style="background-color: white; color: #434348;">&check;</span>
+    </label><br>
+    <label class="btn" style="color: #fff; background-color: #7CB5EC;"> Mean abs error
+    <input type="checkbox" id="norm_mean_abs_err_cb" value="mean_abs_err" class="badgebox" checked>
+    <span class="badge" style="background-color: white; color: #7CB5EC;">&check;</span>
+    </label>
+    <label class="btn" style="color: #fff; background-color: #F4A25B;"> Time
+    <input type="checkbox" id="norm_time_cb" value="time" class="badgebox" checked>
+    <span class="badge" style="background-color: white; color: #F4A25B;">&check;</span>
+    </label><br>
+{% endblock norm_metrics_commands %}
+
+
+{% block raw_metrics_commands %}
+    <label class="btn" style="color: #fff; background-color: #8085E9;"> Standard Deviation
+    <input type="checkbox" id="raw_std_dev_cb" value="std_dev" class="badgebox" >
+        <span class="badge" style="background-color: white; color: #8085E9;">&check;</span>
+    </label>
+    <label class="btn" style="color: #fff; background-color: #90ED7D;"> Mean squared error
+    <input type="checkbox" id="raw_mean_sqrd_err_cb" value="mean_sqrd_err" class="badgebox">
+        <span class="badge" style="background-color: white; color: #90ED7D;">&check;</span>
+    </label><br>
+    <label class="btn" style="color: #fff; background-color: #7CB5EC;"> Mean abs error
+    <input type="checkbox" id="raw_mean_abs_err_cb" value="mean_abs_err" class="badgebox">
+        <span class="badge" style="background-color: white; color: #7CB5EC;">&check;</span>
+    </label>
+    <label class="btn" style="color: #fff; background-color: #E4D354;"> Time
+    <input type="checkbox" id="raw_time_cb" value="time" checked class="badgebox">
+        <span class="badge" style="background-color: white; color: #E4D354;">&check;</span>
+    </label><br>
+{% endblock raw_metrics_commands %}
