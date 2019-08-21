@@ -41,7 +41,7 @@ def poly_reg(request):
 
     for count in range(len(r.current_param_values)):
         # apply the polinomial transformation for a given degree and feature set.
-        t_linear = getLinRegTestData(mean_df_week, r.current_param_values[count])
+        t_linear = getLinRegTestData(mean_df_week, int(r.current_param_values[count]))
 
         # apply the linear regression in the transformed featurespace.
         lm = LinearRegression()
