@@ -29,6 +29,41 @@ def index(request):
     return render(request, 'dashboard/welcome.html')
 
 
+def evaluate(request):
+    param_step = float(request.GET.get('step_val_input', None))
+    param_max_value = float(request.GET.get('max_val_input', None))
+    param_min_value = float(request.GET.get('min_val_input', None))
+    param_to = float(request.GET.get('to_val_input', None))
+    param_from = float(request.GET.get('from_val_input', None))
+    param_current_predictor = request.GET.get('predictorRBG', None)
+    param_current_param_to_fit = request.GET.get('paramToFitRBG', None)
+    return polynomial_regression(request, param_step,param_to,param_from, param_min_value, param_max_value)
+
+
+def polynomial_regression(request, step, to, _from, min, max ):
+    global r
+    # Notice that polynomic regression is made using a transformation of the predictor values as a predictor sample for
+    # linear regression.
+    r = TestResults()
+    r.slider_settings = SliderSettings(min,max,step,_from,to)
+    r.current_param_values = get_new_param_list(r)
+    r.current_predictor = predictors[0]
+    r.current_param_to_fit = params_to_fit[0]
+
+    for count in range(len(r.current_param_values)):
+        # apply the polinomial transformation for a given degree and feature set.
+        t_linear = getLinRegTestData(mean_df_week, int(r.current_param_values[count]))
+
+        # apply the linear regression in the transformed featurespace.
+        lm = LinearRegression()
+        lm.fit(t_linear.X_train, t_linear.y_train)
+        predictions = predictLinearReg(r, t_linear, lm)
+        alg_name = 'Polynomial reg. deg=%s' % r.current_param_values[count]
+        processLinearReg(t_linear, r, predictions, alg_name)
+
+    context = getLinRegReportDump(r, mean_df_week)
+    return render(request, 'dashboard/poly_reg_report.html', {'context': context})
+
 def poly_reg(request):
     global r
     # Notice that polynomic regression is made using a transformation of the predictor values as a predictor sample for

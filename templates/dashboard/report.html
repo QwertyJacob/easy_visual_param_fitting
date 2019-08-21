@@ -1,9 +1,7 @@
 {% extends "dashboard/dashboard.html" %}
 {% load static %}
-{% load javascript_settings_tags %}
 
       {% block extra_head_imports %}
-          <!--script type="text/javascript">{% javascript_settings %}</script-->
         <link rel="stylesheet" href="{% static "css/fancyCheckBoxes.css" %}">
           <link rel="stylesheet" href="{% static "css/fancy_loaders.css" %}">
 
@@ -22,8 +20,12 @@
         <div class="col-sm-7">
             <h4 class="pt-4">Algorithm predictions plot:</h4>
 
-            <div  id="degree_slider_loader" class="little_loader" style="margin-inline-start: 350px "></div>
-            <input hidden="true" id="param_slider" type="text" class="js-range-slider" name="my_range" value="" />
+            <div  id="sliders_loader" class="little_loader" style="margin-inline-start: 350px "></div>
+            <input hidden="true" id="deg_slider" type="text" class="js-range-slider" name="deg_slider" value="" />
+            <input hidden="true" id="c_slider" type="text" class="js-range-slider" name="c_slider" value="" />
+            <input hidden="true" id="gamma_slider" type="text" class="js-range-slider" name="gamma_slider" value="" />
+            <input hidden="true" id="epsilon_slider" type="text" class="js-range-slider" name="epsilon_slider" value="" />
+            <input hidden="true" id="param_to_fit_slider" type="text" class="js-range-slider" name="my_range" value="" />
             {{context.algorithmFilterButtons| safe}}
 
             <div class="border" id="container" style=" max-height: 500px;">

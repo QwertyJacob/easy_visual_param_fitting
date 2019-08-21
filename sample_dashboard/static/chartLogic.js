@@ -336,8 +336,12 @@ CB.change(function () {
 
     };
 
+    let degSlider = $("#deg_slider");
+    let cSlider = $("#c_slider");
+    let gammaSlider = $("#gamma_slider");
+    let epsilonSlider = $("#epsilon_slider");
 
-    let paramSlider = $("#param_slider");
+    let paramToFitSlider = $("#param_to_fit_slider");
 
     class SliderSettings{
         constructor(min_value, max_value, step_value, current_from_value, current_to_value){
@@ -349,7 +353,7 @@ CB.change(function () {
         }
     }
 
-  paramSlider.ionRangeSlider({
+  paramToFitSlider.ionRangeSlider({
         type: "double",
         grid: true,
         prefix: param_to_fit+" = ",
@@ -382,7 +386,7 @@ CB.change(function () {
 
     });
 
-   let paramSliderOptions = paramSlider.data("ionRangeSlider");
+   let paramToFitSliderOptions = paramToFitSlider.data("ionRangeSlider");
 
     let linearSS = new SliderSettings(1,20,1,4,7);
     let polysvrdegSS = new SliderSettings(1,20,1,4,7);
@@ -393,31 +397,31 @@ CB.change(function () {
     let rbfsvrepsilonSS = new SliderSettings(0.01,0.2,0.03,0.03,0.12);
     let rbfsvrCSS = new SliderSettings(0.1,10,0.5,0.1,1.5);
 
-    let updateParamSliderOptions = function(){
+    let updateParamToFitSliderOptions = function(){
         switch (predictor) {
             case predictors[0]:
-                paramSliderOptions.update({from:linearSS.from, to: linearSS.to,
+                paramToFitSliderOptions.update({from:linearSS.from, to: linearSS.to,
                     step:linearSS.step, min: linearSS.min, max:linearSS.max});
                 break;
             case predictors[1]:
                 switch (param_to_fit) {
                     case params_to_fit[0]://deg
-                        paramSliderOptions.update({from:polysvrdegSS.from,
+                        paramToFitSliderOptions.update({from:polysvrdegSS.from,
                                                     to: polysvrdegSS.to, step:polysvrdegSS.step,
                                                     min: polysvrdegSS.min, max:polysvrdegSS.max});
                         break;
                     case params_to_fit[1]://C
-                        paramSliderOptions.update({from:polysvrCSS.from,
+                        paramToFitSliderOptions.update({from:polysvrCSS.from,
                                                     to: polysvrCSS.to, step:polysvrCSS.step,
                                                     min: polysvrCSS.min, max:polysvrCSS.max});
                         break;
                     case params_to_fit[2]://gamma
-                        paramSliderOptions.update({from:polysvrgammaSS.from,
+                        paramToFitSliderOptions.update({from:polysvrgammaSS.from,
                                                     to: polysvrgammaSS.to, step:polysvrgammaSS.step,
                                                     min: polysvrgammaSS.min, max:polysvrgammaSS.max});
                         break;
                     case params_to_fit[3]://epsilon
-                        paramSliderOptions.update({from:polysvrepsilonSS.from,
+                        paramToFitSliderOptions.update({from:polysvrepsilonSS.from,
                                                     to: polysvrepsilonSS.to, step:polysvrepsilonSS.step,
                                                     min: polysvrepsilonSS.min, max:polysvrepsilonSS.max});
                         break;
@@ -426,17 +430,17 @@ CB.change(function () {
             case predictors[2]:
                  switch (param_to_fit) {
                     case params_to_fit[1]://C
-                         paramSliderOptions.update({from:rbfsvrCSS.from,
+                         paramToFitSliderOptions.update({from:rbfsvrCSS.from,
                                                     to: rbfsvrCSS.to, step:rbfsvrCSS.step,
                                                     min: rbfsvrCSS.min, max:rbfsvrCSS.max});
                         break;
                     case params_to_fit[2]://gamma
-                        paramSliderOptions.update({from:rbfsvrgammaSS.from,
+                        paramToFitSliderOptions.update({from:rbfsvrgammaSS.from,
                                                     to: rbfsvrgammaSS.to, step:rbfsvrgammaSS.step,
                                                     min: rbfsvrgammaSS.min, max:rbfsvrgammaSS.max});
                         break;
                     case params_to_fit[3]://epsilon
-                        paramSliderOptions.update({from:rbfsvrepsilonSS.from,
+                        paramToFitSliderOptions.update({from:rbfsvrepsilonSS.from,
                                                     to: rbfsvrepsilonSS.to, step:rbfsvrepsilonSS.step,
                                                     min: rbfsvrepsilonSS.min, max:rbfsvrepsilonSS.max});
                         break;
@@ -445,10 +449,29 @@ CB.change(function () {
         }
     };
 
-    updateParamSliderOptions();
-    let degree_slider_loader = $('#degree_slider_loader');
-    degree_slider_loader.hide();
-    paramSlider.show();
+    let setSingleSliders = function(){
+        switch (predictor) {
+            case predictors[0]:
+                break;
+            case predictors[1]:
+            case predictors[2]:
+                switch (param_to_fit) {
+                    case params_to_fit[0]:
+                        break;
+                    case params_to_fit[1]:
+                        break;
+                    case params_to_fit[2]:
+                        break;
+                    case params_to_fit[3]:
+                        break;
+                }
+                break;
+        }
+    };
+    updateParamToFitSliderOptions();
+    let sliders_loader = $('#sliders_loader');
+    sliders_loader.hide();
+    paramToFitSlider.show();
 
 
 });

@@ -20,43 +20,44 @@
 	<div class="progress-bar progress-bar-striped active" role="progressbar" aria-valuemin="0" aria-valuemax="100"></div>
 	</div>
 	<div class="alert alert-success hide"></div>
-	<form id="user_form" novalidate action="report.html"  method="post">
+	<form id="user_form" action="evaluate" method="get">
 	<fieldset>
 	<h2>Step 1: Chose estimator</h2>
         <div>
           <div class="form-check">
-            <input name="gruppo1" type="radio" id="radio1" checked>
+            <input name="predictorRBG" value="Polynomial Regression" type="radio" id="radio1" checked>
             <label for="radio1">Polynomial Regression</label>
           </div>
           <div class="form-check">
-            <input name="gruppo1" type="radio" id="radio2">
+            <input name="predictorRBG" value="SVR with polynomial Kernel" type="radio" id="radio2">
             <label for="radio2">SVR with polynomial kernels </label>
           </div>
           <div class="form-check">
-            <input name="gruppo1" type="radio" id="radio2">
+            <input name="predictorRBG" value="SVR with RBF kernel" type="radio" id="radio2">
             <label for="radio2">SVR with RBF kernels</label>
           </div>
         </div>
 
 	<input type="button" class="next btn btn-info" value="Next" />
 	</fieldset>
+
 	<fieldset>
 	<h2> Step 2: Chose parameter</h2>
         <div>
           <div class="form-check">
-            <input name="gruppo1" type="radio" id="radio1" checked>
+            <input name="paramToFitRBG" value="c" type="radio" id="radio1" checked>
             <label for="radio1">C penalty parameter</label>
           </div>
           <div class="form-check">
-            <input name="gruppo1" type="radio" id="radio2">
+            <input name="paramToFitRBG"  value="gamma" type="radio" id="radio2">
             <label for="radio2">Gamma kernel coefficient</label>
           </div>
           <div class="form-check">
-            <input name="gruppo1" type="radio" id="radio2">
+            <input name="paramToFitRBG" value="epsilon" type="radio" id="radio2">
             <label for="radio2">Epsilon</label>
           </div>
             <div class="form-check">
-            <input name="gruppo1" type="radio" id="radio2">
+            <input name="paramToFitRBG" value="deg" type="radio" id="radio2">
             <label for="radio2">Polynome degree</label>
           </div>
         </div>
@@ -68,16 +69,31 @@
 
 	<fieldset>
 	<h2>Step 3: Parameter range variation: </h2>
-	<div class="form-group">
+        <div class="form-group">
+        <label  for="min_val_input">Min slider value:</label>
+        <input class="form-control" id="min_val_input"  name="min_val_input"  type="number" />
+        </div>
+        <br/>
+        <div class="form-group">
+        <label for="max_val_input">Max slider value:</label>
+        <input class="form-control" id="max_val_input" name="max_val_input" type="number" />
+        </div>
+        <br/>
+        <div class="form-group">
+        <label for="step_val_input">Step slider value:</label>
+        <input class="form-control" id="step_val_input" name="step_val_input"  type="number" />
+        </div>
+        <br/>
+        <div class="form-group">
+        <label for="from_val_input">Lowest test value:</label>
+        <input class="form-control" id="from_val_input" name="from_val_input"  type="number"  />
+        </div>
+        <br/>
+        <div class="form-group">
+        <label for="to_val_input">Highest test value:</label>
+        <input class="form-control" id="to_val_input" name="to_val_input"  type="number"  />
+        </div>
 
-        <label  id="ex18-label-1" class="hidden" for="ex18a"></label><input id="ex18a" type="text"/>
-
-
-	<span id="ex18-label-2a" class="hidden">Example low value</span>
-    <span id="ex18-label-2b" class="hidden">Example high value</span>
-    <input id="ex18b" type="text"/>
-
-	</div>
 	<input type="button" name="previous" class="previous btn btn-default" value="Previous" />
 	<input type="submit" name="submit" class="submit btn btn-success" value="Submit" />
 	</fieldset>

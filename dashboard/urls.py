@@ -27,6 +27,7 @@ urlpatterns = [
     path('index/rbf_svr_epsilon', views.rbf_svr_epsilon, name='rbf_svr_epsilon'),
     path('index/rbf_svr_C', views.rbf_svr_C, name='rbf_svr_C'),
     path('index/poly_reg', views.poly_reg, name='poly_reg'),
+    url('index/evaluate/$', views.evaluate, name='evaluate'),
     path('index/poly_svr_deg', views.poly_svr_deg, name='poly_svr_deg'),
     path('index/poly_svr_gamma', views.poly_svr_gamma, name='poly_svr_gamma'),
     path('index/poly_svr_epsilon', views.poly_svr_epsilon, name='poly_svr_epsilon'),
@@ -35,8 +36,3 @@ urlpatterns = [
 
 ]
 
-def javascript_settings():
-    js_conf = {
-        'page_title': 'Home',
-    }
-    return js_conf
