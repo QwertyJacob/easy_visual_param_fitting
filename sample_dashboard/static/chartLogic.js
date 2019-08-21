@@ -339,93 +339,19 @@ CB.change(function () {
 
     let paramSlider = $("#param_slider");
 
-    let getMinSliderValue = function (){
-        if(predictor === predictors[0] || predictor === predictors[1]){
-            switch (param_to_fit) {
-            case params_to_fit[0]://degree
-                return 1;
-            case params_to_fit[1]://C
-                return 1;
-            case params_to_fit[2]://gamma
-                return 4.5;
-            case params_to_fit[3]://epsilon
-                return 0.08;
-            }
-        }else{
-            switch (param_to_fit) {
-            case params_to_fit[0]://degree
-                return 1;
-            case params_to_fit[1]://C
-                return 1;
-            case params_to_fit[2]://gamma
-                return 4.5;
-            case params_to_fit[3]://epsilon
-                return 0.01;
-            }
+    class SliderSettings{
+        constructor(min_value, max_value, step_value, current_from_value, current_to_value){
+            this.min = min_value;
+            this.max = max_value;
+            this.step = step_value;
+            this.from = current_from_value;
+            this.to = current_to_value;
         }
-    };
-
-    let getMaxSliderValue = function (){
-        if(predictor === predictors[0] || predictor === predictors[1]){
-            switch (param_to_fit) {
-                case params_to_fit[0]://degree
-                    return 15;
-                case params_to_fit[1]://C
-                    return 40;
-                case params_to_fit[2]://gamma
-                    return 5.5;
-                case params_to_fit[3]://epsilon
-                    return 0.1;
-            }
-        }else{
-             switch (param_to_fit) {
-                case params_to_fit[0]://degree
-                    return 15;
-                case params_to_fit[1]://C
-                    return 20;
-                case params_to_fit[2]://gamma
-                    return 5.5;
-                case params_to_fit[3]://epsilon
-                    return 0.2;
-            }
-        }
-      };
-
-    let getStepSliderValue = function (){
-            if(predictor === predictors[0] || predictor === predictors[1]){
-                switch (param_to_fit) {
-                    case params_to_fit[0]://degree
-                        return 1;
-                    case params_to_fit[1]://C
-                        return 2;
-                    case params_to_fit[2]://gamma
-                        return 0.1;
-                    case params_to_fit[3]://epsilon
-                        return 0.002;
-                }
-            }else{
-                switch (param_to_fit) {
-                    case params_to_fit[0]://degree
-                        return 1;
-                    case params_to_fit[1]://C
-                        return 1;
-                    case params_to_fit[2]://gamma
-                        return 0.1;
-                    case params_to_fit[3]://epsilon
-                        return 0.01;
-                }
-            }
-        };
-
+    }
 
   paramSlider.ionRangeSlider({
         type: "double",
         grid: true,
-        min: getMinSliderValue(),
-        max: getMaxSliderValue(),
-        step: getStepSliderValue(),
-        from: current_param_values[0],
-        to: current_param_values[current_param_values.length-1],
         prefix: param_to_fit+" = ",
         onFinish: function (data) {
             predictionsChart.showLoading();
@@ -456,7 +382,70 @@ CB.change(function () {
 
     });
 
+   let paramSliderOptions = paramSlider.data("ionRangeSlider")
 
+    let linearSS = new SliderSettings(1,20,1,4,7);
+    let polysvrdegSS = new SliderSettings(1,20,1,4,7);
+    let polysvrgammaSS = new SliderSettings(4.0,6.0,0.1,5.0,5.2);
+    let polysvrepsilonSS = new SliderSettings(0.05,0.15,0.005,0.085,0.1);
+    let polysvrCSS = new SliderSettings(0,100,5,1,20);
+    let rbfsvrgammaSS = new SliderSettings(5.1,5.3,0.01,5.18,5.21);
+    let rbfsvrepsilonSS = new SliderSettings(0.01,0.2,0.03,0.03,0.12);
+    let rbfsvrCSS = new SliderSettings(0.1,10,0.5,0.1,1.5);
+
+    let updateParamSliderOptions = function(){
+        switch (predictor) {
+            case predictors[0]:
+                paramSliderOptions.update({from:linearSS.from, to: linearSS.to,
+                    step:linearSS.step, min: linearSS.min, max:linearSS.max});
+                break;
+            case predictors[1]:
+                switch (param_to_fit) {
+                    case params_to_fit[0]://deg
+                        paramSliderOptions.update({from:polysvrdegSS.from,
+                                                    to: polysvrdegSS.to, step:polysvrdegSS.step,
+                                                    min: polysvrdegSS.min, max:polysvrdegSS.max});
+                        break;
+                    case params_to_fit[1]://C
+                        paramSliderOptions.update({from:polysvrCSS.from,
+                                                    to: polysvrCSS.to, step:polysvrCSS.step,
+                                                    min: polysvrCSS.min, max:polysvrCSS.max});
+                        break;
+                    case params_to_fit[2]://gamma
+                        paramSliderOptions.update({from:polysvrgammaSS.from,
+                                                    to: polysvrgammaSS.to, step:polysvrgammaSS.step,
+                                                    min: polysvrgammaSS.min, max:polysvrgammaSS.max});
+                        break;
+                    case params_to_fit[3]://epsilon
+                        paramSliderOptions.update({from:polysvrepsilonSS.from,
+                                                    to: polysvrepsilonSS.to, step:polysvrepsilonSS.step,
+                                                    min: polysvrepsilonSS.min, max:polysvrepsilonSS.max});
+                        break;
+                }
+                break;
+            case predictors[2]:
+                 switch (param_to_fit) {
+                    case params_to_fit[1]://C
+                         paramSliderOptions.update({from:rbfsvrCSS.from,
+                                                    to: rbfsvrCSS.to, step:rbfsvrCSS.step,
+                                                    min: rbfsvrCSS.min, max:rbfsvrCSS.max});
+                        break;
+                    case params_to_fit[2]://gamma
+                        paramSliderOptions.update({from:rbfsvrgammaSS.from,
+                                                    to: rbfsvrgammaSS.to, step:rbfsvrgammaSS.step,
+                                                    min: rbfsvrgammaSS.min, max:rbfsvrgammaSS.max});
+                        break;
+                    case params_to_fit[3]://epsilon
+                        paramSliderOptions.update({from:rbfsvrepsilonSS.from,
+                                                    to: rbfsvrepsilonSS.to, step:rbfsvrepsilonSS.step,
+                                                    min: rbfsvrepsilonSS.min, max:rbfsvrepsilonSS.max});
+                        break;
+                }
+                break;
+        }
+    };
+
+    updateParamSliderOptions();
     let degree_slider_loader = $('#degree_slider_loader');
     degree_slider_loader.hide();
     paramSlider.show();

@@ -66,7 +66,7 @@ def poly_svr_deg(request):
 def poly_svr_gamma(request):
     global r
     r = TestResults()
-    r.current_param_values = [5.25, 5.2, 5.1, 5]
+    r.current_param_values = [5.18, 5.19, 5.2, 5.21] #hot values: [5.25, 5.2, 5.1, 5]
     r.current_predictor = predictors[1]
     r.current_param_to_fit = params_to_fit[2]
 
@@ -86,7 +86,7 @@ def poly_svr_gamma(request):
 def poly_svr_epsilon(request):
     global r
     r = TestResults()
-    r.current_param_values = [0.1, 0.095, 0.09, 0.085]
+    r.current_param_values = [0.085,0.090,0.095,0.100]
     r.current_predictor = predictors[1]
     r.current_param_to_fit = params_to_fit[3]
 
@@ -126,7 +126,7 @@ def poly_svr_C(request):
 def rbf_svr_gamma(request):
     global r
     r = TestResults()
-    r.current_param_values = [5.25, 5.2, 5.1, 5]
+    r.current_param_values = [ 5.1, 5.15, 5.2, 5.25]
     r.current_predictor = predictors[2]
     r.current_param_to_fit = params_to_fit[2]
 
@@ -146,7 +146,7 @@ def rbf_svr_gamma(request):
 def rbf_svr_epsilon(request):
     global r
     r = TestResults()
-    r.current_param_values = [0.01, 0.03, 0.05, 0.08, 0.1]
+    r.current_param_values = [0.06, 0.07, 0.08, 0.1] #hot values [0.01, 0.03, 0.05, 0.08, 0.1]
     r.current_predictor = predictors[2]
     r.current_param_to_fit = params_to_fit[3]
 
@@ -166,10 +166,9 @@ def rbf_svr_epsilon(request):
 def rbf_svr_C(request):
     global r
     r = TestResults()
-    r.current_param_values = [0.1, 0.6, 1, 1.5]
+    r.current_param_values = [0.1, 0.5, 1.0, 1.5]
     r.current_predictor = predictors[2]
     r.current_param_to_fit = params_to_fit[1]
-
 
     for count in range(len(r.current_param_values)):
         # Predictions are done with scaled values.
