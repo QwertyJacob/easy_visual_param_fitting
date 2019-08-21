@@ -29,20 +29,13 @@ def index(request):
     return render(request, 'dashboard/welcome.html')
 
 
-def setup_param_values(r):
-    param_list = np.arange(r.slider_settings.from_value,
-                           r.slider_settings.to_value + r.slider_settings.step_value,
-                           r.slider_settings.step_value)
-    r.current_param_values = param_list.tolist()
-
-
 def poly_reg(request):
     global r
     # Notice that polynomic regression is made using a transformation of the predictor values as a predictor sample for
     # linear regression.
     r = TestResults()
     r.slider_settings = initPolyRegSS
-    setup_param_values(r)
+    r.current_param_values = get_new_param_list(r)
     r.current_predictor = predictors[0]
     r.current_param_to_fit = params_to_fit[0]
 
@@ -65,7 +58,7 @@ def poly_svr_deg(request):
     global r
     r = TestResults()
     r.slider_settings = polysvrdegSS
-    setup_param_values(r)
+    r.current_param_values = get_new_param_list(r)
     r.current_predictor = predictors[1]
     r.current_param_to_fit = params_to_fit[0]
 
@@ -86,7 +79,7 @@ def poly_svr_gamma(request):
     global r
     r = TestResults()
     r.slider_settings = polysvrgammaSS
-    setup_param_values(r)
+    r.current_param_values = get_new_param_list(r)
     r.current_predictor = predictors[1]
     r.current_param_to_fit = params_to_fit[2]
 
@@ -107,7 +100,7 @@ def poly_svr_epsilon(request):
     global r
     r = TestResults()
     r.slider_settings = polysvrepsilonSS
-    setup_param_values(r)
+    r.current_param_values = get_new_param_list(r)
     r.current_predictor = predictors[1]
     r.current_param_to_fit = params_to_fit[3]
 
@@ -128,7 +121,7 @@ def poly_svr_C(request):
     global r
     r = TestResults()
     r.slider_settings = polysvrCSS
-    setup_param_values(r)
+    r.current_param_values = get_new_param_list(r)
     r.current_predictor = predictors[1]
     r.current_param_to_fit = params_to_fit[1]
 
@@ -149,7 +142,7 @@ def rbf_svr_gamma(request):
     global r
     r = TestResults()
     r.slider_settings = rbfsvrgammaSS
-    setup_param_values(r)
+    r.current_param_values = get_new_param_list(r)
     r.current_predictor = predictors[2]
     r.current_param_to_fit = params_to_fit[2]
 
@@ -170,7 +163,7 @@ def rbf_svr_epsilon(request):
     global r
     r = TestResults()
     r.slider_settings = rbfsvrepsilonSS
-    setup_param_values(r)
+    r.current_param_values = get_new_param_list(r)
     r.current_predictor = predictors[2]
     r.current_param_to_fit = params_to_fit[3]
 
@@ -191,7 +184,7 @@ def rbf_svr_C(request):
     global r
     r = TestResults()
     r.slider_settings = rbfsvrCSS
-    setup_param_values(r)
+    r.current_param_values = get_new_param_list(r)
     r.current_predictor = predictors[2]
     r.current_param_to_fit = params_to_fit[1]
 
@@ -215,8 +208,10 @@ def update_report(request):
     param_from = request.GET.get('from', None)
     r.current_predictor = request.GET.get('predictor', None)
     r.current_param_to_fit = request.GET.get('param_to_fit', None)
+    r.slider_settings.to_value = param_to
+    r.slider_settings.from_value = param_from
 
-    new_param_list = get_new_param_list(param_from, param_to)
+    new_param_list = get_new_param_list(r)
 
     increase_series = is_increase_series(r.current_param_values, new_param_list)
 
@@ -225,15 +220,13 @@ def update_report(request):
 
 def update_report_logic(new_param_values, increase):
     global r
-    context = None
-    if r.current_param_to_fit == params_to_fit[0]:
-        # valid for both polynomial reg & SVR with polynomial kernels.
-        r.left_update = is_left_update(r.current_param_values, new_param_values[0], increase)
-        values_to_update = get_values_to_update(r.current_param_values, new_param_values, increase)
-        alg_names_to_update = get_alg_names_to_update(r,values_to_update)
-        updateTestResults(r, values_to_update, alg_names_to_update, increase)
-        context = get_update_report_dump(r, alg_names_to_update, increase)
-        r.current_param_values = new_param_values
+
+    r.left_update = is_left_update(r.current_param_values, new_param_values[0], increase)
+    values_to_update = get_values_to_update(r.current_param_values, new_param_values, increase)
+    alg_names_to_update = get_alg_names_to_update(r,values_to_update)
+    updateTestResults(r, values_to_update, alg_names_to_update, increase)
+    context = get_update_report_dump(r, alg_names_to_update, increase)
+    r.current_param_values = new_param_values
 
     return JsonResponse(context)
 

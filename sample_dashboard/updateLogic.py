@@ -14,10 +14,25 @@ def is_increase_series(current_param_values, new_param_list):
     return False
 
 
-def get_new_param_list(param_from, param_to):
+def get_decimal_cifres(float_num):
+    float_array = str(float_num - int(float_num)).split('.')
+    if len(float_array) > 1 :
+        return len(float_array[1])
+    else :
+        return 0
+
+
+def get_new_param_list(r):
+    decimal_cifres = get_decimal_cifres(r.slider_settings.step_value)
+
+    top_value = round(float(r.slider_settings.from_value),decimal_cifres)
+
     new_param_list = list()
-    for count in range(int(param_from), int(param_to)+1):
-        new_param_list.append(count)
+
+    while top_value <= round(float(r.slider_settings.to_value),decimal_cifres) :
+        new_param_list.append(top_value)
+        top_value = round(top_value + round(float(r.slider_settings.step_value), decimal_cifres), decimal_cifres)
+
     return new_param_list
 
 
