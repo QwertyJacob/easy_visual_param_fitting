@@ -388,7 +388,7 @@ CB.change(function () {
 
    let paramToFitSliderOptions = paramToFitSlider.data("ionRangeSlider");
 
-    let linearSS = new SliderSettings(1,20,1,4,7);
+    /*let linearSS = new SliderSettings(1,20,1,4,7);
     let polysvrdegSS = new SliderSettings(1,20,1,4,7);
     let polysvrgammaSS = new SliderSettings(4.0,6.0,0.1,5.0,5.2);
     let polysvrepsilonSS = new SliderSettings(0.05,0.15,0.005,0.085,0.1);
@@ -396,8 +396,17 @@ CB.change(function () {
     let rbfsvrgammaSS = new SliderSettings(5.1,5.3,0.01,5.18,5.21);
     let rbfsvrepsilonSS = new SliderSettings(0.01,0.2,0.03,0.03,0.12);
     let rbfsvrCSS = new SliderSettings(0.1,10,0.5,0.1,1.5);
+    */
 
     let updateParamToFitSliderOptions = function(){
+        paramToFitSliderOptions.update({
+            from:current_slider_settings._from_value,
+            to: current_slider_settings._to_value,
+                step:current_slider_settings._step_value,
+            min: current_slider_settings._min_value,
+            max:current_slider_settings._max_value});
+    };
+    /*let updateParamToFitSliderOptions = function(){
         switch (predictor) {
             case predictors[0]:
                 paramToFitSliderOptions.update({from:linearSS.from, to: linearSS.to,
@@ -447,7 +456,7 @@ CB.change(function () {
                 }
                 break;
         }
-    };
+    };*/
 
     let setSingleSliders = function(){
         switch (predictor) {
@@ -468,6 +477,7 @@ CB.change(function () {
                 break;
         }
     };
+
     updateParamToFitSliderOptions();
     let sliders_loader = $('#sliders_loader');
     sliders_loader.hide();

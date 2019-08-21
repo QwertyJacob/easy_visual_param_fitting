@@ -64,7 +64,13 @@ class SliderSettings:
         self.min_value = min_value
         self.max_value = max_value
 
-
+    def getDump(self):
+        self_dict =  {'_from_value':self.from_value,
+                      '_to_value':self.to_value,
+                      '_step_value' : self.step_value,
+                      '_min_value':self.min_value,
+                      '_max_value':self.max_value}
+        return json.dumps(self_dict, separators=(',', ':'), sort_keys=True, indent=4)
 
 
 linear_metric_names = ['mean_abs_err', 'mean_sqrd_err', 'std_dev', 'performance (negative)']
@@ -104,7 +110,8 @@ def getSVMReportDump(t,r):
                'alg_names': tab_names,
                'predictor': r.current_predictor,
                'param_to_fit': r.current_param_to_fit,
-               'current_param_values' : r.current_param_values }
+               'current_param_values' : r.current_param_values,
+               'slider_settings': r.slider_settings.getDump()}
 
     return context
 
@@ -273,7 +280,8 @@ def getLinRegReportDump(r, df):
                'alg_names': tab_names,
                'predictor': r.current_predictor,
                'param_to_fit': r.current_param_to_fit,
-               'current_param_values' : r.current_param_values}
+               'current_param_values' : r.current_param_values,
+               'slider_settings' : r.slider_settings.getDump()}
 
     return context
 
@@ -341,7 +349,8 @@ def get_update_report_dump(r, new_alg_names, increase):
                'rawMetricsToAppend': rawMetricsToAppend,
                'table_data': getTableTabsDiv(r),
                'errorCharts' : get_error_charts(r),
-               'alg_names': tab_names}
+               'alg_names': tab_names,
+               'slider_settings': r.slider_settings.getDump()}
 
     if not increase:
         context['alg_names_to_remove'] = new_alg_names

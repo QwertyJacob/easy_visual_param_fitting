@@ -79,6 +79,7 @@
     let predictor = "{{context.predictor }}";
     let param_to_fit = "{{context.param_to_fit}}";
     let current_param_values = {{context.current_param_values}};
+    let current_slider_settings = {{ context.slider_settings | safe }};
 </script>
 
         <script type="text/javascript" src="{% static "chartLogic.js" %}"></script>

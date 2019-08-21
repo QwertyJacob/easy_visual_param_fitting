@@ -30,6 +30,8 @@ def index(request):
 
 
 def evaluate(request):
+    global r
+    r = TestResults()
     param_step = float(request.GET.get('step_val_input', None))
     param_max_value = float(request.GET.get('max_val_input', None))
     param_min_value = float(request.GET.get('min_val_input', None))
@@ -37,79 +39,26 @@ def evaluate(request):
     param_from = float(request.GET.get('from_val_input', None))
     param_current_predictor = request.GET.get('predictorRBG', None)
     param_current_param_to_fit = request.GET.get('paramToFitRBG', None)
+    r.slider_settings = SliderSettings(param_min_value, param_max_value, param_step, param_from, param_to)
+
     if param_current_predictor == predictors[0]:
-        return get_poly_reg_dashboard(request, param_step, param_to, param_from, param_min_value, param_max_value)
+        return poly_reg(request, True)
     if param_current_predictor == predictors[1]:
         if param_current_param_to_fit == params_to_fit[0]:
-            return get_poly_svr_deg_dashboard(request, param_step, param_to, param_from, param_min_value, param_max_value)
+            return poly_svr_deg(request, True)
         if param_current_param_to_fit == params_to_fit[1]: #C
-            return get_poly_svr_C_dashboard(request, param_step, param_to, param_from, param_min_value, param_max_value)
+            return poly_svr_C(request, True)
         if param_current_param_to_fit == params_to_fit[2]:#gamma
-            return get_poly_svr_gamma_dashboard(request, param_step, param_to, param_from, param_min_value, param_max_value)
+            return poly_svr_gamma(request, True)
         if param_current_param_to_fit == params_to_fit[3]:#epsilon
-            return get_poly_svr_epsilon_dashboard(request, param_step, param_to, param_from, param_min_value, param_max_value)
+            return poly_svr_epsilon(request, True)
     if param_current_predictor == predictors[2]:
         if param_current_param_to_fit == params_to_fit[1]:
-            return get_rbf_svr_C_dashboard(request, param_step, param_to, param_from, param_min_value, param_max_value)
+            return rbf_svr_C(request, True)
         if param_current_param_to_fit == params_to_fit[2]:
-            return get_rbf_svr_gamma_dashboard(request, param_step, param_to, param_from, param_min_value, param_max_value)
+            return rbf_svr_gamma(request, True)
         if param_current_param_to_fit == params_to_fit[3]:
-            return get_rbf_svr_epsilon_dashboard(request, param_step, param_to, param_from, param_min_value, param_max_value)
-
-def get_poly_reg_dashboard(request, step, to, _from, min, max):
-    global r
-    r = TestResults()
-    r.slider_settings = SliderSettings(min,max,step,_from,to)
-    return poly_reg(request, True)
-
-
-def get_poly_svr_deg_dashboard(request, step, to, _from, min, max):
-    global r
-    r = TestResults()
-    r.slider_settings = SliderSettings(min,max,step,_from,to)
-    return poly_svr_deg(request, True)
-
-
-def get_poly_svr_gamma_dashboard(request, step, to, _from, min, max):
-    global r
-    r = TestResults()
-    r.slider_settings = SliderSettings(min,max,step,_from,to)
-    return poly_svr_gamma(request, True)
-
-
-def get_poly_svr_C_dashboard(request, step, to, _from, min, max):
-    global r
-    r = TestResults()
-    r.slider_settings = SliderSettings(min,max,step,_from,to)
-    return poly_svr_C(request, True)
-
-
-def get_poly_svr_epsilon_dashboard(request, step, to, _from, min, max):
-    global r
-    r = TestResults()
-    r.slider_settings = SliderSettings(min,max,step,_from,to)
-    return poly_svr_epsilon(request, True)
-
-
-def get_rbf_svr_gamma_dashboard(request, step, to, _from, min, max):
-    global r
-    r = TestResults()
-    r.slider_settings = SliderSettings(min,max,step,_from,to)
-    return rbf_svr_gamma(request, True)
-
-
-def get_rbf_svr_epsilon_dashboard(request, step, to, _from, min, max):
-    global r
-    r = TestResults()
-    r.slider_settings = SliderSettings(min,max,step,_from,to)
-    return rbf_svr_epsilon(request, True)
-
-
-def get_rbf_svr_C_dashboard(request, step, to, _from, min, max):
-    global r
-    r = TestResults()
-    r.slider_settings = SliderSettings(min,max,step,_from,to)
-    return rbf_svr_C(request, True)
+            return rbf_svr_epsilon(request, True)
 
 
 def poly_reg(request, preset = False):
@@ -118,7 +67,11 @@ def poly_reg(request, preset = False):
     # linear regression.
     if not preset:
         r = TestResults()
-        r.slider_settings = initPolyRegSS
+        r.slider_settings = SliderSettings(initPolyRegSS.min_value,
+                                           initPolyRegSS.max_value,
+                                           initPolyRegSS.step_value,
+                                           initPolyRegSS.from_value,
+                                           initPolyRegSS.to_value)
     r.current_param_values = get_new_param_list(r)
     r.current_predictor = predictors[0]
     r.current_param_to_fit = params_to_fit[0]
@@ -142,7 +95,11 @@ def poly_svr_deg(request, preset = False):
     global r
     if not preset:
         r = TestResults()
-        r.slider_settings = polysvrdegSS
+        r.slider_settings = SliderSettings(polysvrdegSS.min_value,
+                                           polysvrdegSS.max_value,
+                                           polysvrdegSS.step_value,
+                                           polysvrdegSS.from_value,
+                                           polysvrdegSS.to_value)
     r.current_param_values = get_new_param_list(r)
     r.current_predictor = predictors[1]
     r.current_param_to_fit = params_to_fit[0]
@@ -164,7 +121,11 @@ def poly_svr_gamma(request, preset = False):
     global r
     if not preset:
         r = TestResults()
-        r.slider_settings = polysvrgammaSS
+        r.slider_settings = SliderSettings(polysvrgammaSS.min_value,
+                                           polysvrgammaSS.max_value,
+                                           polysvrgammaSS.step_value,
+                                           polysvrgammaSS.from_value,
+                                           polysvrgammaSS.to_value)
     r.current_param_values = get_new_param_list(r)
     r.current_predictor = predictors[1]
     r.current_param_to_fit = params_to_fit[2]
@@ -186,7 +147,11 @@ def poly_svr_epsilon(request, preset = False):
     global r
     if not preset:
         r = TestResults()
-        r.slider_settings = polysvrepsilonSS
+        r.slider_settings = SliderSettings(polysvrepsilonSS.min_value,
+                                           polysvrepsilonSS.max_value,
+                                           polysvrepsilonSS.step_value,
+                                           polysvrepsilonSS.from_value,
+                                           polysvrepsilonSS.to_value)
     r.current_param_values = get_new_param_list(r)
     r.current_predictor = predictors[1]
     r.current_param_to_fit = params_to_fit[3]
@@ -208,7 +173,11 @@ def poly_svr_C(request, preset = False):
     global r
     if not preset:
         r = TestResults()
-        r.slider_settings = polysvrCSS
+        r.slider_settings = SliderSettings(polysvrCSS.min_value,
+                                           polysvrCSS.max_value,
+                                           polysvrCSS.step_value,
+                                           polysvrCSS.from_value,
+                                           polysvrCSS.to_value)
     r.current_param_values = get_new_param_list(r)
     r.current_predictor = predictors[1]
     r.current_param_to_fit = params_to_fit[1]
@@ -230,7 +199,11 @@ def rbf_svr_gamma(request, preset = False):
     global r
     if not preset:
         r = TestResults()
-        r.slider_settings = rbfsvrgammaSS
+        r.slider_settings = SliderSettings(rbfsvrgammaSS.min_value,
+                                           rbfsvrgammaSS.max_value,
+                                           rbfsvrgammaSS.step_value,
+                                           rbfsvrgammaSS.from_value,
+                                           rbfsvrgammaSS.to_value)
     r.current_param_values = get_new_param_list(r)
     r.current_predictor = predictors[2]
     r.current_param_to_fit = params_to_fit[2]
@@ -252,7 +225,11 @@ def rbf_svr_epsilon(request, preset = False):
     global r
     if not preset:
         r = TestResults()
-        r.slider_settings = rbfsvrepsilonSS
+        r.slider_settings = SliderSettings(rbfsvrepsilonSS.min_value,
+                                           rbfsvrepsilonSS.max_value,
+                                           rbfsvrepsilonSS.step_value,
+                                           rbfsvrepsilonSS.from_value,
+                                           rbfsvrepsilonSS.to_value)
     r.current_param_values = get_new_param_list(r)
     r.current_predictor = predictors[2]
     r.current_param_to_fit = params_to_fit[3]
@@ -274,7 +251,11 @@ def rbf_svr_C(request, preset = False):
     global r
     if not preset:
         r = TestResults()
-        r.slider_settings = rbfsvrCSS
+        r.slider_settings = SliderSettings(rbfsvrCSS.min_value,
+                                           rbfsvrCSS.max_value,
+                                           rbfsvrCSS.step_value,
+                                           rbfsvrCSS.from_value,
+                                           rbfsvrCSS.to_value)
     r.current_param_values = get_new_param_list(r)
     r.current_predictor = predictors[2]
     r.current_param_to_fit = params_to_fit[1]
@@ -355,7 +336,7 @@ def update_linear_test_results_increase(new_values, new_alg_names):
     index = 0
     for new_value in new_values:
         # apply the polynomial transformation for a given degree and feature set.
-        t_linear = getLinRegTestData(mean_df_week, new_value)
+        t_linear = getLinRegTestData(mean_df_week, int(new_value))
         # apply the linear regression in the transformed feature space.
         lm = LinearRegression()
         lm.fit(t_linear.X_train, t_linear.y_train)
