@@ -26,8 +26,32 @@ def get_alg_names_to_update(r, values_to_update):
     for value_to_update in values_to_update:
         if r.current_predictor == predictors[0]:
             alg_names_to_update.append('Polynomial reg. deg=%s' % value_to_update)
+            continue
         if r.current_predictor == predictors[1]:
-            alg_names_to_update.append('SVR Poly K reg. deg=%s' % value_to_update)
+            if r.current_param_to_fit == params_to_fit[0]:
+                alg_names_to_update.append('SvrPoly deg=%s' % value_to_update)
+                continue
+            if r.current_param_to_fit == params_to_fit[1]:
+                alg_names_to_update.append('SvrPoly C=%s' % value_to_update)
+                continue
+            if r.current_param_to_fit == params_to_fit[2]:
+                alg_names_to_update.append('SvrPoly gamma=%s' % value_to_update)
+                continue
+            if r.current_param_to_fit == params_to_fit[3]:
+                alg_names_to_update.append('SvrPoly eps=%s' % value_to_update)
+                continue
+        if r.current_predictor == predictors[1]:
+            if r.current_param_to_fit == params_to_fit[1]:
+                alg_names_to_update.append('SvrRbf C=%s' % value_to_update)
+                continue
+            if r.current_param_to_fit == params_to_fit[2]:
+                alg_names_to_update.append('SvrRbf gamma=%s' % value_to_update)
+                continue
+            if r.current_param_to_fit == params_to_fit[3]:
+                alg_names_to_update.append('SvrRbf eps=%s' % value_to_update)
+                continue
+
+
     return alg_names_to_update
 
 

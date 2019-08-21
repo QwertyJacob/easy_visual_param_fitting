@@ -9,6 +9,16 @@ mean_df_week = read_data('Week15minMeanNumericalLog')
 r = TestResults()
 t = getSVMTestData(mean_df_week)
 
+initPolyRegSS = SliderSettings(1, 20, 1, 4, 7)
+polysvrdegSS = SliderSettings(1, 20, 1, 4, 7)
+polysvrgammaSS = SliderSettings(4.0, 6.0, 0.1, 5.0, 5.2) #hot values: [5.25, 5.2, 5.1, 5]
+polysvrepsilonSS = SliderSettings(0.05, 0.15, 0.005, 0.085, 0.1)
+polysvrCSS = SliderSettings(0, 100, 5, 1, 20)
+rbfsvrgammaSS = SliderSettings(5.1, 5.3, 0.01, 5.18, 5.21)
+rbfsvrepsilonSS = SliderSettings(0.01, 0.2, 0.03, 0.03, 0.12) #hot values [0.01, 0.03, 0.05, 0.08, 0.1]
+rbfsvrCSS = SliderSettings(0.1, 10, 0.5, 0.1, 1.5)
+
+
 #######################################################
 
 def dashboard(request):
@@ -19,12 +29,20 @@ def index(request):
     return render(request, 'dashboard/welcome.html')
 
 
+def setup_param_values(r):
+    param_list = np.arange(r.slider_settings.from_value,
+                           r.slider_settings.to_value + r.slider_settings.step_value,
+                           r.slider_settings.step_value)
+    r.current_param_values = param_list.tolist()
+
+
 def poly_reg(request):
     global r
     # Notice that polynomic regression is made using a transformation of the predictor values as a predictor sample for
     # linear regression.
     r = TestResults()
-    r.current_param_values = [4, 5, 6, 7]
+    r.slider_settings = initPolyRegSS
+    setup_param_values(r)
     r.current_predictor = predictors[0]
     r.current_param_to_fit = params_to_fit[0]
 
@@ -46,7 +64,8 @@ def poly_reg(request):
 def poly_svr_deg(request):
     global r
     r = TestResults()
-    r.current_param_values = [4, 5, 6, 7]
+    r.slider_settings = polysvrdegSS
+    setup_param_values(r)
     r.current_predictor = predictors[1]
     r.current_param_to_fit = params_to_fit[0]
 
@@ -55,7 +74,7 @@ def poly_svr_deg(request):
         clf = SVR(gamma=5.2, C=10, epsilon=0.1, kernel='poly', degree=r.current_param_values[count], coef0=1)
         clf.fit(t.X_train, t.y_train)
         predictions = SVRpredict(r, t, clf)
-        alg_name = 'SVR Poly K reg. deg=%s' % clf.degree
+        alg_name = 'SvrPoly deg=%s' % clf.degree
         processSVRReg(t, r, clf, predictions, alg_name)
 
     context = getSVMReportDump(t, r)
@@ -66,7 +85,8 @@ def poly_svr_deg(request):
 def poly_svr_gamma(request):
     global r
     r = TestResults()
-    r.current_param_values = [5.18, 5.19, 5.2, 5.21] #hot values: [5.25, 5.2, 5.1, 5]
+    r.slider_settings = polysvrgammaSS
+    setup_param_values(r)
     r.current_predictor = predictors[1]
     r.current_param_to_fit = params_to_fit[2]
 
@@ -75,7 +95,7 @@ def poly_svr_gamma(request):
         clf = SVR(gamma=r.current_param_values[count], C=10, epsilon=0.1, kernel='poly', degree=7, coef0=1)
         clf.fit(t.X_train, t.y_train)
         predictions = SVRpredict(r, t, clf)
-        alg_name = 'SVR poly gamma=%s' % clf.gamma
+        alg_name = 'SvrPoly gamma=%s' % clf.gamma
         processSVRReg(t, r, clf, predictions, alg_name)
 
     context = getSVMReportDump(t, r)
@@ -86,7 +106,8 @@ def poly_svr_gamma(request):
 def poly_svr_epsilon(request):
     global r
     r = TestResults()
-    r.current_param_values = [0.085,0.090,0.095,0.100]
+    r.slider_settings = polysvrepsilonSS
+    setup_param_values(r)
     r.current_predictor = predictors[1]
     r.current_param_to_fit = params_to_fit[3]
 
@@ -95,7 +116,7 @@ def poly_svr_epsilon(request):
         clf = SVR(gamma=5.2, C=10, epsilon=r.current_param_values[count], kernel='poly', degree=7, coef0=1)
         clf.fit(t.X_train, t.y_train)
         predictions = SVRpredict(r, t, clf)
-        alg_name = 'SVR poly7 epsilon=%s' % clf.epsilon
+        alg_name = 'SvrPoly eps=%s' % clf.epsilon
         processSVRReg(t, r, clf, predictions, alg_name)
 
     context = getSVMReportDump(t, r)
@@ -106,7 +127,8 @@ def poly_svr_epsilon(request):
 def poly_svr_C(request):
     global r
     r = TestResults()
-    r.current_param_values = [1, 5, 10, 15, 20]
+    r.slider_settings = polysvrCSS
+    setup_param_values(r)
     r.current_predictor = predictors[1]
     r.current_param_to_fit = params_to_fit[1]
 
@@ -115,7 +137,7 @@ def poly_svr_C(request):
         clf = SVR(gamma=5.2, C=r.current_param_values[count], epsilon=0.1, kernel='poly', degree=7, coef0=1)
         clf.fit(t.X_train, t.y_train)
         predictions = SVRpredict(r, t, clf)
-        alg_name = 'SVR poly C=%s' % clf.C
+        alg_name = 'SvrPoly C=%s' % clf.C
         processSVRReg(t, r, clf, predictions, alg_name)
 
     context = getSVMReportDump(t, r)
@@ -126,7 +148,8 @@ def poly_svr_C(request):
 def rbf_svr_gamma(request):
     global r
     r = TestResults()
-    r.current_param_values = [ 5.1, 5.15, 5.2, 5.25]
+    r.slider_settings = rbfsvrgammaSS
+    setup_param_values(r)
     r.current_predictor = predictors[2]
     r.current_param_to_fit = params_to_fit[2]
 
@@ -135,7 +158,7 @@ def rbf_svr_gamma(request):
         clf = SVR(gamma=r.current_param_values[count], C=10, epsilon=0.1, kernel='poly', degree=7, coef0=1)
         clf.fit(t.X_train, t.y_train)
         predictions = SVRpredict(r, t, clf)
-        alg_name = 'SVR RBF gamma=%s' % clf.gamma
+        alg_name = 'SvrRbf gamma=%s' % clf.gamma
         processSVRReg(t, r, clf, predictions, alg_name)
 
     context = getSVMReportDump(t, r)
@@ -146,7 +169,8 @@ def rbf_svr_gamma(request):
 def rbf_svr_epsilon(request):
     global r
     r = TestResults()
-    r.current_param_values = [0.06, 0.07, 0.08, 0.1] #hot values [0.01, 0.03, 0.05, 0.08, 0.1]
+    r.slider_settings = rbfsvrepsilonSS
+    setup_param_values(r)
     r.current_predictor = predictors[2]
     r.current_param_to_fit = params_to_fit[3]
 
@@ -155,7 +179,7 @@ def rbf_svr_epsilon(request):
         clf = SVR(gamma=20, C=0.9, epsilon=r.current_param_values[count])
         clf.fit(t.X_train, t.y_train)
         predictions = SVRpredict(r, t, clf)
-        alg_name = ' SVR (RBF C=0.9) | epsilon value =%s ' % clf.epsilon
+        alg_name = 'SvrRbf eps=%s' % clf.epsilon
         processSVRReg(t, r, clf, predictions, alg_name)
 
     context = getSVMReportDump(t, r)
@@ -166,7 +190,8 @@ def rbf_svr_epsilon(request):
 def rbf_svr_C(request):
     global r
     r = TestResults()
-    r.current_param_values = [0.1, 0.5, 1.0, 1.5]
+    r.slider_settings = rbfsvrCSS
+    setup_param_values(r)
     r.current_predictor = predictors[2]
     r.current_param_to_fit = params_to_fit[1]
 
@@ -175,7 +200,7 @@ def rbf_svr_C(request):
         clf = SVR(gamma=20, C=r.current_param_values[count])
         clf.fit(t.X_train, t.y_train)
         predictions = SVRpredict(r, t, clf)
-        alg_name = 'SVR Rbf-k,  gamma=20, C value=%s' % clf.C
+        alg_name = 'SvrRbf C=%s' % clf.C
         processSVRReg(t, r, clf, predictions, alg_name)
 
     context = getSVMReportDump(t, r)

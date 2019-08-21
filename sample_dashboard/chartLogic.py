@@ -35,6 +35,7 @@ class TestResults:
         self.current_predictor = ''
         self.current_param_to_fit = ''
         self.current_param_values = list()
+        self.slider_settings = None
 
 class SVMTestData:
     def __init__(self, X_train, X_test, y_train, y_test, original_df, svmScaler, svmDf_scaled):
@@ -47,13 +48,23 @@ class SVMTestData:
         self.svmDf_scaled = svmDf_scaled
 
 
-
 class LinRegTestData:
     def __init__(self, X_train, X_test, y_train, y_test):
         self.X_train = X_train
         self.X_test = X_test
         self.y_train = y_train
         self.y_test = y_test
+
+
+class SliderSettings:
+    def __init__(self, min_value, max_value, step_value, from_value, to_value):
+        self.from_value = from_value
+        self.to_value = to_value
+        self.step_value = step_value
+        self.min_value = min_value
+        self.max_value = max_value
+
+
 
 
 linear_metric_names = ['mean_abs_err', 'mean_sqrd_err', 'std_dev', 'performance (negative)']
