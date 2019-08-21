@@ -382,13 +382,13 @@ CB.change(function () {
 
     });
 
-   let paramSliderOptions = paramSlider.data("ionRangeSlider")
+   let paramSliderOptions = paramSlider.data("ionRangeSlider");
 
     let linearSS = new SliderSettings(1,20,1,4,7);
     let polysvrdegSS = new SliderSettings(1,20,1,4,7);
     let polysvrgammaSS = new SliderSettings(4.0,6.0,0.1,5.0,5.2);
     let polysvrepsilonSS = new SliderSettings(0.05,0.15,0.005,0.085,0.1);
-    let polysvrCSS = new SliderSettings(0,100,5,1,20);
+    let polysvrCSS = new SliderSettings(1,100,5,1,21);
     let rbfsvrgammaSS = new SliderSettings(5.1,5.3,0.01,5.18,5.21);
     let rbfsvrepsilonSS = new SliderSettings(0.01,0.2,0.03,0.03,0.12);
     let rbfsvrCSS = new SliderSettings(0.1,10,0.5,0.1,1.5);
