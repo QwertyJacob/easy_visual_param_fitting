@@ -458,20 +458,51 @@ CB.change(function () {
         }
     };*/
 
-    let setSingleSliders = function(){
+    let $cValInput = $("#c_val_input");
+    let $degValInput = $("#deg_val_input");
+    let $gammaValInput = $("#gamma_val_input");
+    let $epsilonValInput = $("#epsilon_val_input");
+    let $updateBtn = $("#update_params_btn");
+
+    let disable  = function($element){
+        $element.val("");
+        $element.prop("disabled",true);
+        $element.attr("placeholder","fitting...");
+    };
+
+    let show = function($element){
+        $element.parent().css('visibility','visible');
+    };
+
+
+
+    let setParamButtons = function(){
         switch (predictor) {
             case predictors[0]:
                 break;
             case predictors[1]:
             case predictors[2]:
+                show($degValInput);
+                $degValInput.val(other_estimator_params._deg_value);
+                show($cValInput);
+                $cValInput.val(other_estimator_params._c_value);
+                show($gammaValInput);
+                $gammaValInput.val(other_estimator_params._gamma_value);
+                show($epsilonValInput);
+                $epsilonValInput.val(other_estimator_params._epsilon_value);
+                $updateBtn.css('visibility','visible');
                 switch (param_to_fit) {
                     case params_to_fit[0]:
+                        disable($degValInput);
                         break;
                     case params_to_fit[1]:
+                        disable($cValInput);
                         break;
                     case params_to_fit[2]:
+                        disable($gammaValInput);
                         break;
                     case params_to_fit[3]:
+                        disable($epsilonValInput);
                         break;
                 }
                 break;
@@ -481,6 +512,7 @@ CB.change(function () {
     updateParamToFitSliderOptions();
     let sliders_loader = $('#sliders_loader');
     sliders_loader.hide();
+    setParamButtons();
     paramToFitSlider.show();
 
 

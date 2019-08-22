@@ -18,6 +18,8 @@ rbfsvrgammaSS = SliderSettings(5.1, 5.3, 0.01, 5.18, 5.21)
 rbfsvrepsilonSS = SliderSettings(0.01, 0.2, 0.03, 0.03, 0.12) #hot values [0.01, 0.03, 0.05, 0.08, 0.1]
 rbfsvrCSS = SliderSettings(0.1, 10, 0.5, 0.1, 1.5)
 
+polysvrEP = EstimatorParams(10, 5.2, 0.1, 7)
+rbfsvrEP = EstimatorParams(10, 20, 0.1, None)
 
 #######################################################
 
@@ -100,13 +102,18 @@ def poly_svr_deg(request, preset = False):
                                            polysvrdegSS.step_value,
                                            polysvrdegSS.from_value,
                                            polysvrdegSS.to_value)
+        r.estimator_params = EstimatorParams(polysvrEP.c_value,polysvrEP.gamma_value,polysvrEP.epsilon_value,None)
     r.current_param_values = get_new_param_list(r)
     r.current_predictor = predictors[1]
     r.current_param_to_fit = params_to_fit[0]
 
     for count in range(len(r.current_param_values)):
         # Predictions are done with scaled values.
-        clf = SVR(gamma=5.2, C=10, epsilon=0.1, kernel='poly', degree=r.current_param_values[count], coef0=1)
+        clf = SVR(gamma=r.estimator_params.gamma_value,
+                  C=r.estimator_params.c_value,
+                  epsilon=r.estimator_params.epsilon_value,
+                  kernel='poly',
+                  degree=r.current_param_values[count], coef0=1)
         clf.fit(t.X_train, t.y_train)
         predictions = SVRpredict(r, t, clf)
         alg_name = 'SvrPoly deg=%s' % clf.degree
@@ -126,13 +133,18 @@ def poly_svr_gamma(request, preset = False):
                                            polysvrgammaSS.step_value,
                                            polysvrgammaSS.from_value,
                                            polysvrgammaSS.to_value)
+        r.estimator_params = EstimatorParams(polysvrEP.c_value, None, polysvrEP.epsilon_value, polysvrEP.degree_value)
     r.current_param_values = get_new_param_list(r)
     r.current_predictor = predictors[1]
     r.current_param_to_fit = params_to_fit[2]
 
     for count in range(len(r.current_param_values)):
         # Predictions are done with scaled values.
-        clf = SVR(gamma=r.current_param_values[count], C=10, epsilon=0.1, kernel='poly', degree=7, coef0=1)
+        clf = SVR(gamma=r.current_param_values[count],
+                  C=r.estimator_params.c_value,
+                  epsilon=r.estimator_params.epsilon_value,
+                  kernel='poly',
+                  degree=r.estimator_params.degree_value, coef0=1)
         clf.fit(t.X_train, t.y_train)
         predictions = SVRpredict(r, t, clf)
         alg_name = 'SvrPoly gamma=%s' % clf.gamma
@@ -152,13 +164,18 @@ def poly_svr_epsilon(request, preset = False):
                                            polysvrepsilonSS.step_value,
                                            polysvrepsilonSS.from_value,
                                            polysvrepsilonSS.to_value)
+        r.estimator_params = EstimatorParams(polysvrEP.c_value, polysvrEP.gamma_value, None, polysvrEP.degree_value)
     r.current_param_values = get_new_param_list(r)
     r.current_predictor = predictors[1]
     r.current_param_to_fit = params_to_fit[3]
 
     for count in range(len(r.current_param_values)):
         # Predictions are done with scaled values.
-        clf = SVR(gamma=5.2, C=10, epsilon=r.current_param_values[count], kernel='poly', degree=7, coef0=1)
+        clf = SVR(gamma=r.estimator_params.gamma_value,
+                  C=r.estimator_params.c_value,
+                  epsilon=r.current_param_values[count],
+                  kernel='poly',
+                  degree=r.estimator_params.degree_value, coef0=1)
         clf.fit(t.X_train, t.y_train)
         predictions = SVRpredict(r, t, clf)
         alg_name = 'SvrPoly eps=%s' % clf.epsilon
@@ -178,13 +195,18 @@ def poly_svr_C(request, preset = False):
                                            polysvrCSS.step_value,
                                            polysvrCSS.from_value,
                                            polysvrCSS.to_value)
+        r.estimator_params = EstimatorParams(None, polysvrEP.gamma_value, polysvrEP.epsilon_value, polysvrEP.degree_value)
     r.current_param_values = get_new_param_list(r)
     r.current_predictor = predictors[1]
     r.current_param_to_fit = params_to_fit[1]
 
     for count in range(len(r.current_param_values)):
         # Predictions are done with scaled values.
-        clf = SVR(gamma=5.2, C=r.current_param_values[count], epsilon=0.1, kernel='poly', degree=7, coef0=1)
+        clf = SVR(gamma=r.estimator_params.gamma_value,
+                  C=r.current_param_values[count],
+                  epsilon=r.estimator_params.epsilon_value,
+                  kernel='poly',
+                  degree=r.estimator_params.degree_value, coef0=1)
         clf.fit(t.X_train, t.y_train)
         predictions = SVRpredict(r, t, clf)
         alg_name = 'SvrPoly C=%s' % clf.C
@@ -204,13 +226,16 @@ def rbf_svr_gamma(request, preset = False):
                                            rbfsvrgammaSS.step_value,
                                            rbfsvrgammaSS.from_value,
                                            rbfsvrgammaSS.to_value)
+        r.estimator_params = EstimatorParams(rbfsvrEP.c_value, None, rbfsvrEP.epsilon_value, None)
     r.current_param_values = get_new_param_list(r)
     r.current_predictor = predictors[2]
     r.current_param_to_fit = params_to_fit[2]
 
     for count in range(len(r.current_param_values)):
         # Predictions are done with scaled values.
-        clf = SVR(gamma=r.current_param_values[count], C=10, epsilon=0.1, kernel='poly', degree=7, coef0=1)
+        clf = SVR(gamma=r.current_param_values[count],
+                  C=r.estimator_params.c_value,
+                  epsilon=r.estimator_params.epsilon_value, coef0=1)
         clf.fit(t.X_train, t.y_train)
         predictions = SVRpredict(r, t, clf)
         alg_name = 'SvrRbf gamma=%s' % clf.gamma
@@ -230,13 +255,16 @@ def rbf_svr_epsilon(request, preset = False):
                                            rbfsvrepsilonSS.step_value,
                                            rbfsvrepsilonSS.from_value,
                                            rbfsvrepsilonSS.to_value)
+        r.estimator_params = EstimatorParams(rbfsvrEP.c_value, rbfsvrEP.gamma_value, None, None)
     r.current_param_values = get_new_param_list(r)
     r.current_predictor = predictors[2]
     r.current_param_to_fit = params_to_fit[3]
 
     for count in range(len(r.current_param_values)):
         # Predictions are done with scaled values.
-        clf = SVR(gamma=20, C=0.9, epsilon=r.current_param_values[count])
+        clf = SVR(gamma=r.estimator_params.gamma_value,
+                  C=r.estimator_params.c_value,
+                  epsilon=r.current_param_values[count])
         clf.fit(t.X_train, t.y_train)
         predictions = SVRpredict(r, t, clf)
         alg_name = 'SvrRbf eps=%s' % clf.epsilon
@@ -256,13 +284,16 @@ def rbf_svr_C(request, preset = False):
                                            rbfsvrCSS.step_value,
                                            rbfsvrCSS.from_value,
                                            rbfsvrCSS.to_value)
+        r.estimator_params = EstimatorParams(None, rbfsvrEP.gamma_value, rbfsvrEP.epsilon_value, None)
     r.current_param_values = get_new_param_list(r)
     r.current_predictor = predictors[2]
     r.current_param_to_fit = params_to_fit[1]
 
     for count in range(len(r.current_param_values)):
         # Predictions are done with scaled values.
-        clf = SVR(gamma=20, C=r.current_param_values[count])
+        clf = SVR(gamma=r.estimator_params.gamma_value,
+                  C=r.current_param_values[count],
+                  epsilon=r.estimator_params.epsilon_value)
         clf.fit(t.X_train, t.y_train)
         predictions = SVRpredict(r, t, clf)
         alg_name = 'SvrRbf C=%s' % clf.C

@@ -19,12 +19,29 @@
     <div class="row" style="padding-top: 40px">
         <div class="col-sm-7">
             <h4 class="pt-4">Algorithm predictions plot:</h4>
-
+           	<form id="user_form" action="evaluate" method="get">
+                <fieldset>
+                     <div  class="form-group" style="width: 18%; display: inline-block; visibility: hidden">
+                    <label  for="c_val_input">current C val:</label>
+                    <input  class="form-control" id="c_val_input"  name="c_val_input"  type="number" step="any" />
+                    </div>
+                    <div  class="form-group" style="width: 18%; display: inline-block;  visibility: hidden">
+                    <label for="deg_val_input">current Deg val:</label>
+                    <input  class="form-control" id="deg_val_input" name="deg_val_input" type="number" step="any" />
+                    </div>
+                    <div  class="form-group" style="width: 18%; display: inline-block;  visibility: hidden">
+                    <label for="gamma_val_input">current gamma val:</label>
+                    <input  class="form-control" id="gamma_val_input" name="gamma_val_input"  type="number" step="any"/>
+                    </div>
+                    <div  class="form-group" style="width: 18%; display: inline-block;  visibility: hidden">
+                    <label for="epsilon_val_input">current eps val:</label>
+                    <input  class="form-control" id="epsilon_val_input" name="epsilon_val_input"  type="number" step="any" />
+                    </div>
+                    <input  id="update_params_btn" type="submit" name="submit" class="submit btn btn-success" value="Update" style="width: 18%; display: inline-block;  visibility: hidden"/>
+                </fieldset>
+            </form>
             <div  id="sliders_loader" class="little_loader" style="margin-inline-start: 350px "></div>
-            <input hidden="true" id="deg_slider" type="text" class="js-range-slider" name="deg_slider" value="" />
-            <input hidden="true" id="c_slider" type="text" class="js-range-slider" name="c_slider" value="" />
-            <input hidden="true" id="gamma_slider" type="text" class="js-range-slider" name="gamma_slider" value="" />
-            <input hidden="true" id="epsilon_slider" type="text" class="js-range-slider" name="epsilon_slider" value="" />
+
             <input hidden="true" id="param_to_fit_slider" type="text" class="js-range-slider" name="my_range" value="" />
             {{context.algorithmFilterButtons| safe}}
 
@@ -80,6 +97,8 @@
     let param_to_fit = "{{context.param_to_fit}}";
     let current_param_values = {{context.current_param_values}};
     let current_slider_settings = {{ context.slider_settings | safe }};
+    let other_estimator_params = {{ context.other_estimator_params | safe }};
+
 </script>
 
         <script type="text/javascript" src="{% static "chartLogic.js" %}"></script>

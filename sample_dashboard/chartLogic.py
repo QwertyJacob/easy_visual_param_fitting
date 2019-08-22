@@ -36,6 +36,7 @@ class TestResults:
         self.current_param_to_fit = ''
         self.current_param_values = list()
         self.slider_settings = None
+        self.estimator_params = None
 
 class SVMTestData:
     def __init__(self, X_train, X_test, y_train, y_test, original_df, svmScaler, svmDf_scaled):
@@ -46,6 +47,21 @@ class SVMTestData:
         self.original_df = original_df
         self.svmScaler = svmScaler
         self.svmDf_scaled = svmDf_scaled
+
+
+class EstimatorParams:
+    def __init__(self, _c_value, _gamma_value, _epsilon_value, _deg_value):
+        self.c_value = _c_value
+        self.gamma_value = _gamma_value
+        self.epsilon_value = _epsilon_value
+        self.degree_value = _deg_value
+
+    def getDump(self):
+        self_dict = {'_c_value':self.c_value,
+                      '_gamma_value':self.gamma_value,
+                      '_epsilon_value' : self.epsilon_value,
+                      '_deg_value':self.degree_value}
+        return json.dumps(self_dict, separators=(',', ':'), sort_keys=True, indent=4)
 
 
 class LinRegTestData:
@@ -77,6 +93,7 @@ linear_metric_names = ['mean_abs_err', 'mean_sqrd_err', 'std_dev', 'performance 
 svr_metric_names = ['mean_abs_err', 'mean_sqrd_err', 'std_dev', 'performance (negative)', 'sv ratio']
 predictors = ['Polynomial Regression', 'SVR with polynomial Kernel', 'SVR with RBF kernel']
 params_to_fit = ['deg','C','gamma','epsilon']
+
 
 def getSVMReportDump(t,r):
 
@@ -111,7 +128,8 @@ def getSVMReportDump(t,r):
                'predictor': r.current_predictor,
                'param_to_fit': r.current_param_to_fit,
                'current_param_values' : r.current_param_values,
-               'slider_settings': r.slider_settings.getDump()}
+               'slider_settings': r.slider_settings.getDump(),
+               'other_estimator_params': r.estimator_params.getDump() }
 
     return context
 
