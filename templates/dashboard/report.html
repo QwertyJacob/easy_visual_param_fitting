@@ -17,9 +17,9 @@
 {% block body %}
 
     <div class="row" style="padding-top: 40px">
-        <div class="col-sm-7">
+        <div class="col-sm-6">
             <h4 class="pt-4">Algorithm predictions plot:</h4>
-           	<form id="user_form" action="evaluate" method="get">
+           	<form id="user_form" action="/update_evaluation" method="get">
                 <fieldset>
                      <div  class="form-group" style="width: 18%; display: inline-block; visibility: hidden">
                     <label  for="c_val_input">current C val:</label>
@@ -41,14 +41,15 @@
                 </fieldset>
             </form>
             <div  id="sliders_loader" class="little_loader" style="margin-inline-start: 350px "></div>
-
             <input hidden="true" id="param_to_fit_slider" type="text" class="js-range-slider" name="my_range" value="" />
             {{context.algorithmFilterButtons| safe}}
+            <h4>Error distributions:</h4>
+                    <div id="table_data_div" >
+                        {{context.table_data| safe}}
+                    </div>
 
-            <div class="border" id="container" style=" max-height: 500px;">
-            </div>
         </div>
-         <div class="col-sm-4">
+         <div class="col-sm-6">
             <h4 class="pt-4">Algorithm comparison metrics:</h4>
             <ul class="nav nav-tabs" role="tablist">
                 <li class="nav-item">
@@ -70,14 +71,13 @@
                     <div class="border" id="rawMetricsChartContainer"style="height: 400px; "></div>
                  </div>
              </div>
+         <div class="border" id="container" style=" height: 700px;">
+            </div>
         </div>
     </div>
     <div class="row">
-    <div class="col-sm-11">
-        <h4>Error distributions:</h4>
-        <div id="table_data_div" >
-            {{context.table_data| safe}}
-        </div>
+    <div class="col-sm-10">
+
     </div>
     </div><!-- nested row-->
 {% endblock body %}

@@ -50,17 +50,17 @@ class SVMTestData:
 
 
 class EstimatorParams:
-    def __init__(self, _c_value, _gamma_value, _epsilon_value, _deg_value):
+    def __init__(self, _c_value=None, _gamma_value=None, _epsilon_value=None, _deg_value=None):
         self.c_value = _c_value
         self.gamma_value = _gamma_value
         self.epsilon_value = _epsilon_value
-        self.degree_value = _deg_value
+        self.deg_value = _deg_value
 
     def getDump(self):
         self_dict = {'_c_value':self.c_value,
                       '_gamma_value':self.gamma_value,
                       '_epsilon_value' : self.epsilon_value,
-                      '_deg_value':self.degree_value}
+                      '_deg_value':self.deg_value}
         return json.dumps(self_dict, separators=(',', ':'), sort_keys=True, indent=4)
 
 
@@ -299,7 +299,8 @@ def getLinRegReportDump(r, df):
                'predictor': r.current_predictor,
                'param_to_fit': r.current_param_to_fit,
                'current_param_values' : r.current_param_values,
-               'slider_settings' : r.slider_settings.getDump()}
+               'slider_settings' : r.slider_settings.getDump(),
+               'other_estimator_params': r.estimator_params.getDump() }
 
     return context
 

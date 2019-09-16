@@ -31,16 +31,63 @@ def index(request):
     return render(request, 'dashboard/welcome.html')
 
 
+def get_preset_params(param_current_predictor, param_current_param_to_fit):
+    if param_current_predictor == predictors[0]:
+        return initPolyRegSS, None
+    if param_current_predictor == predictors[1]:
+        if param_current_param_to_fit == params_to_fit[0]:
+            return polysvrdegSS, polysvrEP
+        if param_current_param_to_fit == params_to_fit[1]:  # C
+            return polysvrCSS, polysvrEP
+        if param_current_param_to_fit == params_to_fit[2]:  # gamma
+            return polysvrgammaSS, polysvrEP
+        if param_current_param_to_fit == params_to_fit[3]:  # epsilon
+            return polysvrepsilonSS, polysvrEP
+    if param_current_predictor == predictors[2]:
+        if param_current_param_to_fit == params_to_fit[1]:
+            return rbfsvrCSS, rbfsvrEP
+        if param_current_param_to_fit == params_to_fit[2]:
+            return rbfsvrgammaSS, rbfsvrEP
+        if param_current_param_to_fit == params_to_fit[3]:
+            return rbfsvrepsilonSS, rbfsvrEP
+
+
 def evaluate(request):
     global r
-    r = TestResults()
-    param_step = float(request.GET.get('step_val_input', None))
-    param_max_value = float(request.GET.get('max_val_input', None))
-    param_min_value = float(request.GET.get('min_val_input', None))
-    param_to = float(request.GET.get('to_val_input', None))
-    param_from = float(request.GET.get('from_val_input', None))
+
     param_current_predictor = request.GET.get('predictorRBG', None)
     param_current_param_to_fit = request.GET.get('paramToFitRBG', None)
+
+    r = TestResults()
+    param_step = request.GET.get('step_val_input', None)
+    param_max_value = request.GET.get('max_val_input', None)
+    param_min_value = request.GET.get('min_val_input', None)
+    param_to = request.GET.get('to_val_input', None)
+    param_from = request.GET.get('from_val_input', None)
+
+    preset_ss_params, preset_e_params = get_preset_params(param_current_predictor, param_current_param_to_fit)
+
+    param_step = float(param_step) if param_step is not None else preset_ss_params.step_value
+    param_max_value = float(param_max_value) if param_max_value is not None else preset_ss_params.max_value
+    param_min_value = float(param_min_value) if param_min_value is not None else preset_ss_params.min_value
+    param_to = float(param_to) if param_step is not None else preset_ss_params.to_value
+    param_from = float(param_from) if param_from is not None else preset_ss_params.from_value
+
+    param_degree = request.GET.get('deg_val_input', None)
+    param_epsilon = request.GET.get('epsilon_val_input', None)
+    param_C = request.GET.get('c_val_input', None)
+    param_gamma = request.GET.get('gamma_val_input', None)
+
+    if param_current_predictor != predictors[0]:
+        param_degree = float(param_degree) if param_degree is not None else preset_e_params.deg_value
+        param_epsilon = float(param_epsilon) if param_epsilon is not None else preset_e_params.epsilon_value
+        param_C = float(param_C) if param_C is not None else preset_e_params.c_value
+        param_gamma = float(param_gamma) if param_gamma is not None else preset_e_params.gamma_value
+
+    r.estimator_params = EstimatorParams(param_C,param_gamma,param_epsilon,param_degree)
+    r.current_predictor = param_current_predictor
+    r.current_param_to_fit = param_current_param_to_fit
+
     r.slider_settings = SliderSettings(param_min_value, param_max_value, param_step, param_from, param_to)
 
     if param_current_predictor == predictors[0]:
@@ -63,6 +110,50 @@ def evaluate(request):
             return rbf_svr_epsilon(request, True)
 
 
+def clean_test_results():
+    global r
+    current_slider_settings = r.slider_settings
+    current_predictor = r.current_predictor
+    current_param_to_fit = r.current_param_to_fit
+    r = TestResults()
+    r.slider_settings = current_slider_settings
+    r.current_predictor =  current_predictor
+    r.current_param_to_fit = current_param_to_fit
+
+def update_evaluation(request):
+    global r
+    clean_test_results()
+
+    param_degree = request.GET.get('deg_val_input', None)
+    param_epsilon = request.GET.get('epsilon_val_input', None)
+    param_C = request.GET.get('c_val_input', None)
+    param_gamma = request.GET.get('gamma_val_input', None)
+
+    param_degree = float(param_degree) if param_degree is not None else None
+    param_epsilon = float(param_epsilon) if param_epsilon is not None else None
+    param_C = float(param_C) if param_C is not None else None
+    param_gamma = float(param_gamma) if param_gamma is not None else None
+
+    r.estimator_params = EstimatorParams(_c_value=param_C,_gamma_value=param_gamma,_epsilon_value=param_epsilon,_deg_value=param_degree)
+
+    if r.current_predictor == predictors[1]:
+        if r.current_param_to_fit == params_to_fit[0]:
+            return poly_svr_deg(request, True)
+        if r.current_param_to_fit == params_to_fit[1]:  # C
+            return poly_svr_C(request, True)
+        if r.current_param_to_fit == params_to_fit[2]:  # gamma
+            return poly_svr_gamma(request, True)
+        if r.current_param_to_fit == params_to_fit[3]:  # epsilon
+            return poly_svr_epsilon(request, True)
+    if r.current_predictor == predictors[2]:
+        if r.current_param_to_fit == params_to_fit[1]:
+            return rbf_svr_C(request, True)
+        if r.current_param_to_fit == params_to_fit[2]:
+            return rbf_svr_gamma(request, True)
+        if r.current_param_to_fit == params_to_fit[3]:
+            return rbf_svr_epsilon(request, True)
+
+
 def poly_reg(request, preset = False):
     global r
     # Notice that polynomic regression is made using a transformation of the predictor values as a predictor sample for
@@ -74,6 +165,7 @@ def poly_reg(request, preset = False):
                                            initPolyRegSS.step_value,
                                            initPolyRegSS.from_value,
                                            initPolyRegSS.to_value)
+        r.estimator_params = EstimatorParams()
     r.current_param_values = get_new_param_list(r)
     r.current_predictor = predictors[0]
     r.current_param_to_fit = params_to_fit[0]
@@ -133,7 +225,7 @@ def poly_svr_gamma(request, preset = False):
                                            polysvrgammaSS.step_value,
                                            polysvrgammaSS.from_value,
                                            polysvrgammaSS.to_value)
-        r.estimator_params = EstimatorParams(polysvrEP.c_value, None, polysvrEP.epsilon_value, polysvrEP.degree_value)
+        r.estimator_params = EstimatorParams(polysvrEP.c_value, None, polysvrEP.epsilon_value, polysvrEP.deg_value)
     r.current_param_values = get_new_param_list(r)
     r.current_predictor = predictors[1]
     r.current_param_to_fit = params_to_fit[2]
@@ -144,7 +236,7 @@ def poly_svr_gamma(request, preset = False):
                   C=r.estimator_params.c_value,
                   epsilon=r.estimator_params.epsilon_value,
                   kernel='poly',
-                  degree=r.estimator_params.degree_value, coef0=1)
+                  degree=r.estimator_params.deg_value, coef0=1)
         clf.fit(t.X_train, t.y_train)
         predictions = SVRpredict(r, t, clf)
         alg_name = 'SvrPoly gamma=%s' % clf.gamma
@@ -164,7 +256,7 @@ def poly_svr_epsilon(request, preset = False):
                                            polysvrepsilonSS.step_value,
                                            polysvrepsilonSS.from_value,
                                            polysvrepsilonSS.to_value)
-        r.estimator_params = EstimatorParams(polysvrEP.c_value, polysvrEP.gamma_value, None, polysvrEP.degree_value)
+        r.estimator_params = EstimatorParams(polysvrEP.c_value, polysvrEP.gamma_value, None, polysvrEP.deg_value)
     r.current_param_values = get_new_param_list(r)
     r.current_predictor = predictors[1]
     r.current_param_to_fit = params_to_fit[3]
@@ -175,7 +267,7 @@ def poly_svr_epsilon(request, preset = False):
                   C=r.estimator_params.c_value,
                   epsilon=r.current_param_values[count],
                   kernel='poly',
-                  degree=r.estimator_params.degree_value, coef0=1)
+                  degree=r.estimator_params.deg_value, coef0=1)
         clf.fit(t.X_train, t.y_train)
         predictions = SVRpredict(r, t, clf)
         alg_name = 'SvrPoly eps=%s' % clf.epsilon
@@ -195,7 +287,7 @@ def poly_svr_C(request, preset = False):
                                            polysvrCSS.step_value,
                                            polysvrCSS.from_value,
                                            polysvrCSS.to_value)
-        r.estimator_params = EstimatorParams(None, polysvrEP.gamma_value, polysvrEP.epsilon_value, polysvrEP.degree_value)
+        r.estimator_params = EstimatorParams(None, polysvrEP.gamma_value, polysvrEP.epsilon_value, polysvrEP.deg_value)
     r.current_param_values = get_new_param_list(r)
     r.current_predictor = predictors[1]
     r.current_param_to_fit = params_to_fit[1]
@@ -206,7 +298,7 @@ def poly_svr_C(request, preset = False):
                   C=r.current_param_values[count],
                   epsilon=r.estimator_params.epsilon_value,
                   kernel='poly',
-                  degree=r.estimator_params.degree_value, coef0=1)
+                  degree=r.estimator_params.deg_value, coef0=1)
         clf.fit(t.X_train, t.y_train)
         predictions = SVRpredict(r, t, clf)
         alg_name = 'SvrPoly C=%s' % clf.C
@@ -340,28 +432,71 @@ def updateTestResults(r, new_values, new_alg_names, increase):
             new_values.reverse()
             new_alg_names.reverse()
         if r.current_predictor == predictors[0]:
-            update_linear_test_results_increase(new_values, new_alg_names)
-        if r.current_predictor == predictors[1]:
-            update_svr_test_results_increase(new_values, new_alg_names)
+            update_linear_reg_results_increase(new_values, new_alg_names)
+        else:
+            update_svr_results_increase(new_values,new_alg_names)
     else:
         update_test_results_decrease(new_values, new_alg_names)
 
 
-def update_svr_test_results_increase(new_values, new_alg_names):
+def update_svr_results_increase(new_values, new_alg_names):
     global r
     global t
+    models = get_svr_models(r, new_values)
     index = 0
-    for new_value in new_values:
-        # Predictions are done with scaled values.
-        clf = SVR(gamma=5.2, C=10, epsilon=0.1,
-                  kernel='poly', degree=new_value, coef0=1)
+    for clf in models:
         clf.fit(t.X_train, t.y_train)
         predictions = SVRpredict(r, t, clf)
         processSVRReg(t, r, clf, predictions, new_alg_names[index])
         index = index + 1
 
 
-def update_linear_test_results_increase(new_values, new_alg_names):
+def get_svr_models(r, new_values):
+    svr_models = list()
+    for new_value in new_values:
+        if r.current_predictor == predictors[0]:
+            continue
+        if r.current_predictor == predictors[1]:
+            if r.current_param_to_fit == params_to_fit[0]:
+                svr_models.append(SVR(gamma=r.estimator_params.gamma_value, C=r.estimator_params.c_value,
+                                      epsilon=r.estimator_params.epsilon_value,
+                                    kernel='poly', degree=int(new_value), coef0=1))
+                continue
+            if r.current_param_to_fit == params_to_fit[1]:  # C
+                svr_models.append(SVR(gamma=r.estimator_params.gamma_value, C=float(new_value),
+                                      epsilon=r.estimator_params.epsilon_value,
+                                      kernel='poly', degree=r.estimator_params.deg_value, coef0=1))
+                continue
+            if r.current_param_to_fit == params_to_fit[2]:  # gamma
+                svr_models.append(SVR(gamma=float(new_value), C=r.estimator_params.c_value,
+                                      epsilon=r.estimator_params.epsilon_value,
+                                      kernel='poly', degree=r.estimator_params.deg_value, coef0=1))
+                continue
+            if r.current_param_to_fit == params_to_fit[3]:  # epsilon
+                svr_models.append(SVR(gamma=r.estimator_params.gamma_value, C=r.estimator_params.c_value,
+                                      epsilon=float(new_value),
+                                      kernel='poly', degree=r.estimator_params.deg_value, coef0=1))
+                continue
+        if r.current_predictor == predictors[2]:
+            if r.current_param_to_fit == params_to_fit[1]:
+                svr_models.append(SVR(gamma=r.estimator_params.gamma_value, C=float(new_value),
+                                      epsilon=r.estimator_params.epsilon_value,
+                                      coef0=1))
+                continue
+            if r.current_param_to_fit == params_to_fit[2]:
+                svr_models.append(SVR(gamma=float(new_value), C=r.estimator_params.c_value,
+                                      epsilon=r.estimator_params.epsilon_value,
+                                       coef0=1))
+                continue
+            if r.current_param_to_fit == params_to_fit[3]:
+                svr_models.append(SVR(gamma=r.estimator_params.gamma_value, C=r.estimator_params.c_value,
+                                      epsilon=float(new_value),
+                                        coef0=1))
+                continue
+    return  svr_models
+
+
+def update_linear_reg_results_increase(new_values, new_alg_names):
     global r
     global mean_df_week
     index = 0

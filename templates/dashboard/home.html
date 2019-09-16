@@ -20,7 +20,7 @@
 	<div class="progress-bar progress-bar-striped active" role="progressbar" aria-valuemin="0" aria-valuemax="100"></div>
 	</div>
 	<div class="alert alert-success hide"></div>
-	<form id="user_form" action="evaluate" method="get">
+	<form id="user_form" action="/evaluate" method="get">
 	<fieldset>
 	<h2>Step 1: Chose estimator</h2>
         <div>
@@ -45,7 +45,7 @@
 	<h2> Step 2: Chose parameter</h2>
         <div>
           <div class="form-check">
-            <input name="paramToFitRBG" value="c" type="radio" id="radio1" checked>
+            <input name="paramToFitRBG" value="C" type="radio" id="radio1" checked>
             <label for="radio1">C penalty parameter</label>
           </div>
           <div class="form-check">
@@ -69,26 +69,15 @@
 
 	<fieldset>
 	<h2>Step 3: Parameter range variation: </h2>
-        <div class="form-group">
-        <label  for="min_val_input">Min slider value:</label>
-        <input class="form-control" id="min_val_input"  name="min_val_input"  type="number" step="any" />
+        <div class="form-group" style="display: inline-block;" >
+        <label  for="min_val_input">Min slider value:</label><input class="form-control" id="min_val_input"  name="min_val_input"  type="number" step="any" />
+        <label for="max_val_input">Max slider value:</label><input class="form-control" id="max_val_input" name="max_val_input" type="number" step="any" />
+        <label for="from_val_input">Lowest test value:</label><input class="form-control" id="from_val_input" name="from_val_input"  type="number" step="any" />
+        <label for="to_val_input">Highest test value:</label> <input class="form-control" id="to_val_input" name="to_val_input"  type="number" step="any" />
+        <label for="step_val_input">Step slider value:</label><input class="form-control" id="step_val_input" name="step_val_input"  type="number" step="any"/>
         </div>
-        <div class="form-group">
-        <label for="max_val_input">Max slider value:</label>
-        <input class="form-control" id="max_val_input" name="max_val_input" type="number" step="any" />
-        </div>
-        <div class="form-group">
-        <label for="step_val_input">Step slider value:</label>
-        <input class="form-control" id="step_val_input" name="step_val_input"  type="number" step="any"/>
-        </div>
-        <div class="form-group">
-        <label for="from_val_input">Lowest test value:</label>
-        <input class="form-control" id="from_val_input" name="from_val_input"  type="number" step="any" />
-        </div>
-        <div class="form-group">
-        <label for="to_val_input">Highest test value:</label>
-        <input class="form-control" id="to_val_input" name="to_val_input"  type="number" step="any" />
-        </div>
+
+
 
 	<input type="button" name="previous" class="previous btn btn-default" value="Previous" />
 	<input type="submit" name="submit" class="submit btn btn-success" value="Submit" />
